@@ -3,13 +3,13 @@
     <p>A comprehensive API for all user roles (Customer, Shop Owner, Delivery Agent, Admin) in the Near2Door app.</p>
 
     <h2 style="color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 5px; font-size: 2em;">Customer Endpoints</h2>
-    <hr>
+    <hr style="border: 0; height: 1px; background-color: #ddd;">
     <h3 style="font-size: 1.5em; margin-top: 2em;"><span style="font-weight: bold; padding: 5px 10px; border-radius: 4px; color: white; display: inline-block; background-color: #27ae60;">POST</span> /auth/register</h3>
     <p><strong>Summary:</strong> Register a new customer</p>
     <p><strong>Description:</strong> Creates a new customer account.</p>
     <p><strong>Request Body:</strong> <code>CustomerRegistration</code> schema</p>
     <p><strong>Responses:</strong></p>
-    <ul>
+    <ul style="list-style-type: none; padding-left: 20px;">
         <li><strong>201 Created:</strong> User registered successfully. Returns <code>UserAuthResponse</code>.</li>
         <li><strong>400 Bad Request:</strong> Bad Request, e.g., username or email already exists.</li>
     </ul>
@@ -19,7 +19,7 @@
     <p><strong>Description:</strong> Authenticates a user and returns a JWT token.</p>
     <p><strong>Request Body:</strong> <code>UserLogin</code> schema</p>
     <p><strong>Responses:</strong></p>
-    <ul>
+    <ul style="list-style-type: none; padding-left: 20px;">
         <li><strong>200 OK:</strong> Successful login. Returns <code>UserLoginResponse</code>.</li>
         <li><strong>401 Unauthorized:</strong> Unauthorized, invalid credentials.</li>
     </ul>
@@ -28,16 +28,16 @@
     <p><strong>Summary:</strong> Get all shops</p>
     <p><strong>Description:</strong> Retrieves a list of all local shops, with real-time status updates.</p>
     <p><strong>Responses:</strong></p>
-    <ul>
+    <ul style="list-style-type: none; padding-left: 20px;">
         <li><strong>200 OK:</strong> A list of shops. Returns an array of <code>Shop</code> objects.</li>
     </ul>
-    
+
     <h3 style="font-size: 1.5em; margin-top: 2em;"><span style="font-weight: bold; padding: 5px 10px; border-radius: 4px; color: white; display: inline-block; background-color: #3498db;">GET</span> /shops/{shopId}</h3>
     <p><strong>Summary:</strong> Get a single shop</p>
     <p><strong>Description:</strong> Retrieves details for a specific shop by its ID.</p>
     <p><strong>Parameters:</strong> <code>shopId</code> (path, integer)</p>
     <p><strong>Responses:</strong></p>
-    <ul>
+    <ul style="list-style-type: none; padding-left: 20px;">
         <li><strong>200 OK:</strong> Details of the requested shop. Returns a <code>ShopDetails</code> object.</li>
         <li><strong>404 Not Found:</strong> Shop not found.</li>
     </ul>
@@ -47,7 +47,7 @@
     <p><strong>Description:</strong> Places a new order from a customer. Requires authentication.</p>
     <p><strong>Request Body:</strong> <code>NewOrder</code> schema</p>
     <p><strong>Responses:</strong></p>
-    <ul>
+    <ul style="list-style-type: none; padding-left: 20px;">
         <li><strong>201 Created:</strong> Order placed successfully.</li>
         <li><strong>401 Unauthorized:</strong> Unauthorized, authentication required.</li>
     </ul>
@@ -57,28 +57,28 @@
     <p><strong>Description:</strong> Retrieves a list of all orders placed by the authenticated user.</p>
     <p><strong>Parameters:</strong> <code>userId</code> (path, integer)</p>
     <p><strong>Responses:</strong></p>
-    <ul>
+    <ul style="list-style-type: none; padding-left: 20px;">
         <li><strong>200 OK:</strong> A list of customer orders. Returns an array of <code>Order</code> objects.</li>
     </ul>
 
     <h2 style="color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 5px; font-size: 2em;">Shop Owner Endpoints</h2>
-    <hr>
+    <hr style="border: 0; height: 1px; background-color: #ddd;">
     <h3 style="font-size: 1.5em; margin-top: 2em;"><span style="font-weight: bold; padding: 5px 10px; border-radius: 4px; color: white; display: inline-block; background-color: #27ae60;">POST</span> /shops/{shopId}/products</h3>
     <p><strong>Summary:</strong> Add a new product</p>
     <p><strong>Description:</strong> Allows a shop owner to add a new product to their shop. Requires authentication.</p>
     <p><strong>Parameters:</strong> <code>shopId</code> (path, integer)</p>
     <p><strong>Request Body:</strong> <code>NewProduct</code> schema</p>
     <p><strong>Responses:</strong></p>
-    <ul>
+    <ul style="list-style-type: none; padding-left: 20px;">
         <li><strong>201 Created:</strong> Product added successfully.</li>
     </ul>
-    
+
     <h3 style="font-size: 1.5em; margin-top: 2em;"><span style="font-weight: bold; padding: 5px 10px; border-radius: 4px; color: white; display: inline-block; background-color: #3498db;">GET</span> /shops/{shopId}/products</h3>
     <p><strong>Summary:</strong> Get a shop's products</p>
     <p><strong>Description:</strong> Retrieves all products for a specific shop, including stock status.</p>
     <p><strong>Parameters:</strong> <code>shopId</code> (path, integer)</p>
     <p><strong>Responses:</strong></p>
-    <ul>
+    <ul style="list-style-type: none; padding-left: 20px;">
         <li><strong>200 OK:</strong> A list of products. Returns an array of <code>Product</code> objects.</li>
     </ul>
 
@@ -88,7 +88,7 @@
     <p><strong>Parameters:</strong> <code>shopId</code>, <code>productId</code> (path, integer)</p>
     <p><strong>Request Body:</strong> <code>ProductUpdate</code> schema</p>
     <p><strong>Responses:</strong></p>
-    <ul>
+    <ul style="list-style-type: none; padding-left: 20px;">
         <li><strong>200 OK:</strong> Product updated successfully.</li>
     </ul>
 
@@ -97,7 +97,7 @@
     <p><strong>Description:</strong> Retrieves all pending, active, and completed orders for a specific shop. Requires authentication.</p>
     <p><strong>Parameters:</strong> <code>shopId</code> (path, integer)</p>
     <p><strong>Responses:</strong></p>
-    <ul>
+    <ul style="list-style-type: none; padding-left: 20px;">
         <li><strong>200 OK:</strong> A list of orders. Returns an array of <code>Order</code> objects.</li>
     </ul>
 
@@ -107,18 +107,18 @@
     <p><strong>Parameters:</strong> <code>shopId</code>, <code>orderId</code> (path, integer)</p>
     <p><strong>Request Body:</strong> Object with a `status` field (`accepted` or `cancelled`).</p>
     <p><strong>Responses:</strong></p>
-    <ul>
+    <ul style="list-style-type: none; padding-left: 20px;">
         <li><strong>200 OK:</strong> Order status updated.</li>
     </ul>
 
     <h2 style="color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 5px; font-size: 2em;">Delivery Agent Endpoints</h2>
-    <hr>
+    <hr style="border: 0; height: 1px; background-color: #ddd;">
     <h3 style="font-size: 1.5em; margin-top: 2em;"><span style="font-weight: bold; padding: 5px 10px; border-radius: 4px; color: white; display: inline-block; background-color: #3498db;">GET</span> /agents/{agentId}/orders</h3>
     <p><strong>Summary:</strong> Get delivery agent's assigned orders</p>
     <p><strong>Description:</strong> Retrieves a list of orders assigned to a specific delivery agent. Requires authentication.</p>
     <p><strong>Parameters:</strong> <code>agentId</code> (path, integer)</p>
     <p><strong>Responses:</strong></p>
-    <ul>
+    <ul style="list-style-type: none; padding-left: 20px;">
         <li><strong>200 OK:</strong> A list of assigned orders. Returns an array of <code>DeliveryOrder</code> objects.</li>
     </ul>
 
@@ -128,7 +128,7 @@
     <p><strong>Parameters:</strong> <code>orderId</code> (path, integer)</p>
     <p><strong>Request Body:</strong> Object with a `status` field (`picked_up`, `in_transit`, or `delivered`).</p>
     <p><strong>Responses:</strong></p>
-    <ul>
+    <ul style="list-style-type: none; padding-left: 20px;">
         <li><strong>200 OK:</strong> Delivery status updated.</li>
     </ul>
 
@@ -137,18 +137,18 @@
     <p><strong>Description:</strong> Retrieves the earning history and performance metrics for a delivery agent. Requires authentication.</p>
     <p><strong>Parameters:</strong> <code>agentId</code> (path, integer)</p>
     <p><strong>Responses:</strong></p>
-    <ul>
+    <ul style="list-style-type: none; padding-left: 20px;">
         <li><strong>200 OK:</strong> Agent earnings and performance metrics. Returns an <code>AgentEarnings</code> object.</li>
     </ul>
 
     <h2 style="color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 5px; font-size: 2em;">Admin Endpoints</h2>
-    <hr>
+    <hr style="border: 0; height: 1px; background-color: #ddd;">
     <h3 style="font-size: 1.5em; margin-top: 2em;"><span style="font-weight: bold; padding: 5px 10px; border-radius: 4px; color: white; display: inline-block; background-color: #27ae60;">POST</span> /admin/auth/login</h3>
     <p><strong>Summary:</strong> Admin login</p>
     <p><strong>Description:</strong> Secure login for the admin panel.</p>
     <p><strong>Request Body:</strong> Object with `username` and `password`.</p>
     <p><strong>Responses:</strong></p>
-    <ul>
+    <ul style="list-style-type: none; padding-left: 20px;">
         <li><strong>200 OK:</strong> Successful login.</li>
     </ul>
 
@@ -157,7 +157,7 @@
     <p><strong>Description:</strong> Retrieves a list of all shops with filter options.</p>
     <p><strong>Parameters:</strong> <code>status</code> (query, optional), `subscription` (query, optional).</p>
     <p><strong>Responses:</strong></p>
-    <ul>
+    <ul style="list-style-type: none; padding-left: 20px;">
         <li><strong>200 OK:</strong> A list of shops for the admin panel.</li>
     </ul>
 
@@ -166,7 +166,7 @@
     <p><strong>Description:</strong> Approves a shop and sets its subscription to inactive.</p>
     <p><strong>Parameters:</strong> <code>shopId</code> (path, integer)</p>
     <p><strong>Responses:</strong></p>
-    <ul>
+    <ul style="list-style-type: none; padding-left: 20px;">
         <li><strong>200 OK:</strong> Shop approved successfully.</li>
     </ul>
 
@@ -174,7 +174,7 @@
     <p><strong>Summary:</strong> Get all delivery agents</p>
     <p><strong>Description:</strong> Retrieves a list of all delivery agents for management.</p>
     <p><strong>Responses:</strong></p>
-    <ul>
+    <ul style="list-style-type: none; padding-left: 20px;">
         <li><strong>200 OK:</strong> A list of delivery agents.</li>
     </ul>
 
@@ -182,7 +182,7 @@
     <p><strong>Summary:</strong> Get all system orders</p>
     <p><strong>Description:</strong> Retrieves a list of all orders across the platform for tracking and management.</p>
     <p><strong>Responses:</strong></p>
-    <ul>
+    <ul style="list-style-type: none; padding-left: 20px;">
         <li><strong>200 OK:</strong> A list of all orders.</li>
     </ul>
 
@@ -190,14 +190,14 @@
     <p><strong>Summary:</strong> Get financial overview</p>
     <p><strong>Description:</strong> Retrieves financial data including revenue, payments, and commissions.</p>
     <p><strong>Responses:</strong></p>
-    <ul>
+    <ul style="list-style-type: none; padding-left: 20px;">
         <li><strong>200 OK:</strong> Financial data.</li>
     </ul>
 
     <h2 style="color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 5px; font-size: 2em;">API Data Models (Schemas)</h2>
-    <hr>
+    <hr style="border: 0; height: 1px; background-color: #ddd;">
     <p>These are the data structures used throughout the API.</p>
-    
+
     <pre style="background-color: #f4f4f4; border: 1px solid #ddd; border-radius: 4px; padding: 10px; overflow-x: auto; font-family: 'Courier New', Courier, monospace;"><code>
 components:
   securitySchemes:
