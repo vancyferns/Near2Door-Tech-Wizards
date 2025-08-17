@@ -1,9 +1,9 @@
 from pymongo import MongoClient
 import os
 
-MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
+MONGO_URI = os.getenv("MONGO_URI")
 client = MongoClient(MONGO_URI)
-db = client["near2door_db"]
+db = client["Near2Door"]
 
 users_col = db["users"]
 shops_col = db["shops"]
