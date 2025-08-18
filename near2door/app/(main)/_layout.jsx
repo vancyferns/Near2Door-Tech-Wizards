@@ -1,14 +1,17 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
+import { useAuth } from '../../utils/AuthContext';
 
-// NOTE: In a real application, you would get the user's role from a global state
-// or a securely stored token after login.
-// We'll use a placeholder for now.
-const userRole = 'shop owner'; // Change this to test different roles
+// Determine role from auth context
+function useUserRole() {
+  const { user } = useAuth();
+  return user?.role || 'customer';
+}
 
 const customerTabs = (
   <Tabs>
     <Tabs.Screen name="shops" options={{ title: 'Shops' }} />
+    <Tabs.Screen name="cart" options={{ title: 'Cart' }} />
     <Tabs.Screen name="orders" options={{ title: 'My Orders' }} />
   </Tabs>
 );
@@ -35,7 +38,8 @@ const adminTabs = (
 );
 
 export default function MainLayout() {
-  switch (userRole) {
+  const role = useUserRole();
+  switch (role) {
     case 'customer':
       return customerTabs;
     case 'shop owner':

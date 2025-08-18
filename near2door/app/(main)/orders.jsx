@@ -1,18 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, ActivityIndicator } from 'react-native';
 import { API_BASE_URL } from '../../utils/api';
-
-// IMPORTANT: Replace with a real user ID, preferably fetched from a secure state or token.
-const USER_ID = '68a16faeb8b67f5006194f17';
+import { useAuth } from '../../utils/AuthContext';
 
 export default function OrdersScreen() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+  const userId = user?.id || user?._id || '68a16faeb8b67f5006194f17';
 
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/users/${USER_ID}/orders`);
+        const response = await fetch(`${API_BASE_URL}/users/${userId}/orders`);
         const data = await response.json();
         setOrders(data);
       } catch (error) {
