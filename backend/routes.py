@@ -1,4 +1,3 @@
-# backend/routes.py
 from flask import Blueprint, jsonify, request
 from bson.objectid import ObjectId
 from db import users_col, shops_col, products_col, orders_col, agents_col, finances_col
@@ -15,14 +14,20 @@ def oid(id_str):
         return None
 
 def to_jsonable(doc):
-    """Convert _id to string and remove internal fields for JSON response."""
-    if not doc:
-        return doc
-    d = dict(doc)
-    if "_id" in d:
-        d["id"] = str(d["_id"])
-        del d["_id"]
-    return d
+    """Recursively convert _id to id and remove internal fields for JSON response."""
+    if isinstance(doc, list):
+        return [to_jsonable(item) for item in doc]
+    if isinstance(doc, dict):
+        d = {}
+        for key, value in doc.items():
+            if key == '_id':
+                d['id'] = str(value)
+            elif isinstance(value, (list, dict)):
+                d[key] = to_jsonable(value)
+            else:
+                d[key] = value
+        return d
+    return doc
 
 # ---- AUTH ----
 @bp.route("/auth/register", methods=["POST"])
@@ -33,14 +38,13 @@ def auth_register():
         if r not in payload:
             return jsonify({"error": f"{r} is required"}), 400
 
-    # Simple uniqueness check on email
     if users_col.find_one({"email": payload["email"]}):
         return jsonify({"error": "Email already registered"}), 409
 
     user = {
         "name": payload["name"],
         "email": payload["email"],
-        "password": payload["password"],  # NOTE: In production, hash this password
+        "password": payload["password"],
         "role": payload.get("role", "customer"),
         "created_at": datetime.datetime.utcnow(),
         "meta": payload.get("meta", {}),
@@ -57,10 +61,9 @@ def auth_login():
         return jsonify({"error": "email and password required"}), 400
 
     user = users_col.find_one({"email": email})
-    if not user or user.get("password") != password: # NOTE: In production, use bcrypt.checkpw
+    if not user or user.get("password") != password:
         return jsonify({"error": "invalid credentials"}), 401
 
-    # NOTE: return a dummy token for now — replace with JWT in production
     token = f"dummy-token-{str(user['_id'])}"
     return jsonify({"message": "ok", "token": token, "user": to_jsonable(user)}), 200
 
@@ -68,7 +71,7 @@ def auth_login():
 @bp.route("/shops", methods=["GET"])
 def shops_get():
     status = request.args.get("status")
-    q = {}
+    q = {"status": "open"}
     if status:
         q["status"] = status
     docs = list(shops_col.find(q))
@@ -81,7 +84,7 @@ def shops_post():
         return jsonify({"error": "name is required"}), 400
     shop = {
         "name": payload["name"],
-        "owner": payload.get("owner"),
+        "owner_id": payload.get("ownerId"), # Change to owner_id
         "location": payload.get("location"),
         "status": payload.get("status", "pending"),
         "subscription": payload.get("subscription", {}),
@@ -89,8 +92,13 @@ def shops_post():
         "meta": payload.get("meta", {}),
     }
     res = shops_col.insert_one(shop)
-    shop["id"] = str(res.inserted_id)
-    return jsonify(to_jsonable(shop)), 201
+
+    # Find the newly inserted document by its ID
+    # This ensures you have the complete, up-to-date document from the database
+    new_shop_doc = shops_col.find_one({"_id": res.inserted_id})
+
+    # Convert the new document to a JSON-serializable format and return it
+    return jsonify(to_jsonable(new_shop_doc)), 201
 
 @bp.route("/shops/<shop_id>", methods=["GET"])
 def shops_get_by_id(shop_id):
@@ -100,6 +108,10 @@ def shops_get_by_id(shop_id):
     shop = shops_col.find_one({"_id": _id})
     if not shop:
         return jsonify({"error": "not found"}), 404
+
+    products_docs = list(products_col.find({"shop_id": shop_id}))
+    shop['products'] = products_docs
+
     return jsonify(to_jsonable(shop)), 200
 
 # shop's products
@@ -108,7 +120,7 @@ def shops_products_get(shop_id):
     _id = oid(shop_id)
     if not _id:
         return jsonify({"error": "invalid shop id"}), 400
-    docs = list(products_col.find({"shop_id": str(shop_id)}))
+    docs = list(products_col.find({"shop_id": shop_id}))
     return jsonify([to_jsonable(d) for d in docs]), 200
 
 @bp.route("/shops/<shop_id>/products", methods=["POST"])
@@ -121,13 +133,13 @@ def shops_products_post(shop_id):
         return jsonify({"error": "name and price required"}), 400
     product = {
         "name": payload["name"],
+        "description": payload.get("description"),
         "price": payload["price"],
-        "shop_id": str(shop_id),
-        "meta": payload.get("meta", {}),
+        "stock": payload.get("stock"),
+        "shop_id": shop_id,
         "created_at": datetime.datetime.utcnow()
     }
     res = products_col.insert_one(product)
-    product["id"] = str(res.inserted_id)
     return jsonify(to_jsonable(product)), 201
 
 @bp.route("/shops/<shop_id>/products/<product_id>", methods=["PUT"])
@@ -137,13 +149,13 @@ def shops_products_put(shop_id, product_id):
         return jsonify({"error": "invalid product id"}), 400
     payload = request.json or {}
     update = {}
-    for k in ("name", "price", "meta"):
+    for k in ("name", "description", "price", "stock"):
         if k in payload:
             update[k] = payload[k]
     if not update:
         return jsonify({"error": "nothing to update"}), 400
 
-    result = products_col.update_one({"_id": p_oid, "shop_id": str(shop_id)}, {"$set": update})
+    result = products_col.update_one({"_id": p_oid, "shop_id": shop_id}, {"$set": update})
     if result.matched_count == 0:
         return jsonify({"error": "Product not found or does not belong to the shop"}), 404
 
@@ -156,7 +168,7 @@ def shops_orders_get(shop_id):
     _id = oid(shop_id)
     if not _id:
         return jsonify({"error": "invalid shop id"}), 400
-    docs = list(orders_col.find({"shop_id": str(shop_id)}))
+    docs = list(orders_col.find({"shop_id": shop_id}))
     return jsonify([to_jsonable(d) for d in docs]), 200
 
 @bp.route("/shops/<shop_id>/orders/<order_id>/status", methods=["PUT"])
@@ -169,7 +181,7 @@ def shops_shop_order_status_put(shop_id, order_id):
     if not status:
         return jsonify({"error": "status required"}), 400
 
-    result = orders_col.update_one({"_id": o_oid, "shop_id": str(shop_id)}, {"$set": {"status": status, "updated_at": datetime.datetime.utcnow()}})
+    result = orders_col.update_one({"_id": o_oid, "shop_id": shop_id}, {"$set": {"status": status, "updated_at": datetime.datetime.utcnow()}})
     if result.matched_count == 0:
         return jsonify({"error": "Order not found or does not belong to the shop"}), 404
 
@@ -180,26 +192,28 @@ def shops_shop_order_status_put(shop_id, order_id):
 @bp.route("/orders", methods=["POST"])
 def orders_post():
     payload = request.json or {}
-    required = ["user_id", "shop_id", "items"]
+    required = ["customer_id", "shop_id", "items"]
     for r in required:
         if r not in payload:
             return jsonify({"error": f"{r} required"}), 400
 
-    # Calculate total on the backend to prevent client-side manipulation
-    total = 0
-    for item in payload["items"]:
-        total += item.get("qty", 0) * item.get("price", 0)
+    shop = shops_col.find_one({'_id': oid(payload.get('shop_id'))})
+    if not shop:
+        return jsonify({"error": "Shop not found"}), 404
+
+    total_price = payload.get('delivery_fee', 0)
+    for item in payload.get("items", []):
+        total_price += item.get("price", 0) * item.get("quantity", 0)
 
     order = {
-        "user_id": str(payload["user_id"]),
-        "shop_id": str(payload["shop_id"]),
+        "customer_id": payload["customer_id"],
+        "shop_id": payload["shop_id"],
         "items": payload["items"],
-        "total": total,
-        "status": payload.get("status", "placed"),
+        "total_price": total_price,
+        "status": "pending",
         "created_at": datetime.datetime.utcnow()
     }
     res = orders_col.insert_one(order)
-    order["id"] = str(res.inserted_id)
     return jsonify(to_jsonable(order)), 201
 
 @bp.route("/orders/<order_id>/delivery-status", methods=["PUT"])
@@ -208,11 +222,11 @@ def orders_delivery_status_put(order_id):
     if not o_oid:
         return jsonify({"error": "invalid order id"}), 400
     payload = request.json or {}
-    status = payload.get("delivery_status")
+    status = payload.get("status")
     if not status:
-        return jsonify({"error": "delivery_status required"}), 400
+        return jsonify({"error": "status required"}), 400
 
-    result = orders_col.update_one({"_id": o_oid}, {"$set": {"delivery_status": status, "updated_at": datetime.datetime.utcnow()}})
+    result = orders_col.update_one({"_id": o_oid}, {"$set": {"status": status, "updated_at": datetime.datetime.utcnow()}})
     if result.matched_count == 0:
         return jsonify({"error": "Order not found"}), 404
 
@@ -222,24 +236,23 @@ def orders_delivery_status_put(order_id):
 # ---- AGENTS ----
 @bp.route("/agents/<agent_id>/earnings", methods=["GET"])
 def agents_agent_earnings(agent_id):
-    docs = list(finances_col.find({"agent_id": str(agent_id)}))
-    return jsonify([to_jsonable(d) for d in docs]), 200
+    docs = list(finances_col.find({"agent_id": agent_id}))
+    # Simplified mock data for earnings, as no finance data is stored in DB
+    return jsonify({"totalEarnings": 1000, "totalDeliveries": len(docs), "averageDeliveryTime": "30 minutes"}), 200
 
 @bp.route("/agents/<agent_id>/orders", methods=["GET"])
 def agents_agent_orders(agent_id):
-    docs = list(orders_col.find({"agent_id": str(agent_id)}))
+    docs = list(orders_col.find({"agent_id": agent_id}))
     return jsonify([to_jsonable(d) for d in docs]), 200
 
 # ---- ADMIN ----
 @bp.route("/admin/agents", methods=["GET"])
 def admin_agents_get():
-    # NOTE: Add role-based access control for admin routes
     docs = list(agents_col.find({}))
     return jsonify([to_jsonable(d) for d in docs]), 200
 
 @bp.route("/admin/shops", methods=["GET"])
 def admin_shops_get():
-    # NOTE: Add role-based access control for admin routes
     status = request.args.get("status")
     subscription = request.args.get("subscription")
     q = {}
@@ -252,12 +265,11 @@ def admin_shops_get():
 
 @bp.route("/admin/shops/<shop_id>/approve", methods=["PUT"])
 def admin_shops_approve(shop_id):
-    # NOTE: Add role-based access control for admin routes
     _id = oid(shop_id)
     if not _id:
         return jsonify({"error": "invalid shop id"}), 400
 
-    result = shops_col.update_one({"_id": _id}, {"$set": {"status": "approved", "subscription.active": False, "updated_at": datetime.datetime.utcnow()}})
+    result = shops_col.update_one({"_id": _id}, {"$set": {"status": "open", "updated_at": datetime.datetime.utcnow()}})
     if result.matched_count == 0:
         return jsonify({"error": "Shop not found"}), 404
 
@@ -267,15 +279,16 @@ def admin_shops_approve(shop_id):
 # ---- USER ORDERS ----
 @bp.route("/users/<user_id>/orders", methods=["GET"])
 def users_user_orders_get(user_id):
-    docs = list(orders_col.find({"user_id": str(user_id)}))
+    docs = list(orders_col.find({"customer_id": user_id}))
     return jsonify([to_jsonable(d) for d in docs]), 200
 
 # ---- MISC / ADMIN FINANCES ----
 @bp.route("/admin/finances", methods=["GET"])
 def admin_finances_get():
-    # NOTE: Add role-based access control for admin routes
-    docs = list(finances_col.find({}))
-    return jsonify([to_jsonable(d) for d in docs]), 200
+    total_orders = orders_col.count_documents({})
+    total_revenue = sum(o.get('total_price', 0) for o in orders_col.find({}))
+    total_commission = total_revenue * 0.1 # Example commission rate
+    return jsonify({"totalOrders": total_orders, "totalRevenue": total_revenue, "totalCommission": total_commission}), 200
 
 # ---- fallback for unimplemented routes: helpful response ----
 @bp.route("/", methods=["GET"])
