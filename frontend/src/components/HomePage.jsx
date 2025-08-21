@@ -1,91 +1,114 @@
-import React from 'react';
+import React from "react";
 
-const HomePage = ({ onNavigate }) => {
+const HomePage = () => {
   return (
     <div className="bg-white text-gray-900 font-sans antialiased">
-      {/* Hero Section - 30% Yellow */}
-      <div className="bg-yellow-400 py-16 px-4 text-center relative overflow-hidden flex flex-col items-center justify-center min-h-screen">
-        <div className="relative z-10 flex flex-col items-center">
-          <h1 className="text-6xl md:text-8xl font-bold text-gray-900 leading-tight">
-            Near2Door
-          </h1>
-          <p className="text-xl md:text-2xl mt-4 font-semibold text-gray-800">
-            Where Every Home Matters.
-          </p>
-          <button
-            onClick={() => onNavigate({ name: 'shops' })}
-            className="mt-8 px-10 py-4 bg-gray-900 text-yellow-400 font-bold rounded-full shadow-lg hover:bg-gray-700 transition-all transform hover:scale-105"
-          >
-            TRY NOW
-          </button>
-        </div>
-      </div>
+      {/* Hero Section */}
+      <section className="bg-yellow-400 min-h-[80vh] flex flex-col items-center justify-center text-center px-6 relative overflow-hidden">
+        <h1 className="text-6xl md:text-8xl font-extrabold text-gray-900 drop-shadow-md">
+          Near2Door
+        </h1>
+        <p className="text-2xl md:text-3xl mt-6 font-medium text-gray-800 max-w-2xl">
+          Connecting Customers, Shops & Delivery Agents – Right in Your Community.
+        </p>
+        <button className="mt-10 px-10 py-4 bg-gray-900 text-yellow-400 text-lg font-bold rounded-full shadow-xl hover:bg-gray-800 transform hover:scale-105 transition">
+          Get Started
+        </button>
+      </section>
 
-      {/* Who We Serve Section - 10% Black */}
-      <div className="bg-gray-900 text-white py-16 px-4 text-center">
-        <div className="container mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold mb-10 text-yellow-400">WHO WE SERVE</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {/* Customer Card */}
-            <div className="bg-gray-800 p-6 rounded-xl shadow-lg transform transition-transform hover:scale-105">
-              <img src="/image_af2fab.png" alt="A person using a delivery app" className="h-24 w-auto mx-auto mb-4" />
-              <h3 className="text-2xl font-bold mt-4 mb-2">Customers</h3>
-              <p className="text-gray-400">
-                Get your daily essentials delivered straight from your trusted local shops.
-              </p>
-            </div>
-            {/* Delivery Agent Card */}
-            <div className="bg-gray-800 p-6 rounded-xl shadow-lg transform transition-transform hover:scale-105">
-              <img src="/image_af2ca4.png" alt="A delivery agent on a scooter" className="h-24 w-auto mx-auto mb-4" />
-              <h3 className="text-2xl font-bold mt-4 mb-2">Delivery Agents</h3>
-              <p className="text-gray-400">
-                Earn on your schedule. We empower local youth with flexible, dignified work.
-              </p>
-            </div>
-            {/* Shop Card */}
-            <div className="bg-gray-800 p-6 rounded-xl shadow-lg transform transition-transform hover:scale-105">
-              <img src="/image_af2cde.png" alt="A local shop front" className="h-24 w-auto mx-auto mb-4" />
-              <h3 className="text-2xl font-bold mt-4 mb-2">Shops</h3>
-              <p className="text-gray-400">
-                Digitize your store in minutes – no apps, no tech stress. Serve more customers.
-              </p>
-            </div>
+      {/* Who We Serve Section */}
+      <section className="bg-gray-900 text-white py-20 px-6 text-center">
+        <h2 className="text-4xl font-extrabold text-yellow-400 mb-14">
+          Who We Serve
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          {/* Customers */}
+          <div className="bg-gray-800 p-8 rounded-xl shadow-lg hover:scale-105 transition">
+            <img
+              src="https://img.icons8.com/ios-filled/100/ffffff/shopping-bag.png"
+              alt="Customers"
+              className="h-20 mx-auto mb-6"
+            />
+            <h3 className="text-2xl font-bold mb-2">Customers</h3>
+            <p className="text-gray-400">
+              Get your essentials delivered straight from your trusted local shops.
+            </p>
+          </div>
+          {/* Delivery Agents */}
+          <div className="bg-gray-800 p-8 rounded-xl shadow-lg hover:scale-105 transition">
+            <img
+              src="https://img.icons8.com/ios-filled/100/ffffff/delivery.png"
+              alt="Agents"
+              className="h-20 mx-auto mb-6"
+            />
+            <h3 className="text-2xl font-bold mb-2">Delivery Agents</h3>
+            <p className="text-gray-400">
+              Flexible work and dignified income for youth in your community.
+            </p>
+          </div>
+          {/* Shops */}
+          <div className="bg-gray-800 p-8 rounded-xl shadow-lg hover:scale-105 transition">
+            <img
+              src="https://img.icons8.com/ios-filled/100/ffffff/shop.png"
+              alt="Shops"
+              className="h-20 mx-auto mb-6"
+            />
+            <h3 className="text-2xl font-bold mb-2">Shops</h3>
+            <p className="text-gray-400">
+              Go digital in minutes – serve more customers without tech stress.
+            </p>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Why Near2Door Section - 60% White */}
-      <div className="bg-white py-16 px-4 text-center">
-        <div className="container mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-10">WHY Near2Door</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {/* Trusted By Locals Card */}
-            <div className="bg-gray-100 p-6 rounded-xl shadow-md transform transition-transform hover:scale-105">
-              <span role="img" aria-label="trusted-icon" className="text-4xl text-yellow-500">🤝</span>
-              <h3 className="text-2xl font-bold mt-4 mb-2 text-yellow-600">Trusted By Locals</h3>
-              <p className="text-gray-600">
-                Our unique approach means every time you order, you're placing your trust in someone from your community.
-              </p>
-            </div>
-            {/* Cash & UPI Card */}
-            <div className="bg-gray-100 p-6 rounded-xl shadow-md transform transition-transform hover:scale-105">
-              <span role="img" aria-label="payment-icon" className="text-4xl text-yellow-500">💳</span>
-              <h3 className="text-2xl font-bold mt-4 mb-2 text-yellow-600">Cash & UPI – Both Welcomed</h3>
-              <p className="text-gray-600">
-                We accept cash and all major UPI payments on delivery, offering seamless flexibility.
-              </p>
-            </div>
-            {/* Community-Powered Card */}
-            <div className="bg-gray-100 p-6 rounded-xl shadow-md transform transition-transform hover:scale-105">
-              <span role="img" aria-label="community-icon" className="text-4xl text-yellow-500">🧑‍🤝‍🧑</span>
-              <h3 className="text-2xl font-bold mt-4 mb-2 text-yellow-600">Community-Powered Delivery</h3>
-              <p className="text-gray-600">
-                Orders are fulfilled by a network of local youth, strengthening your community from the inside out.
-              </p>
-            </div>
+      {/* Why Choose Us Section */}
+      <section className="bg-white py-20 px-6 text-center">
+        <h2 className="text-4xl font-extrabold text-gray-900 mb-14">
+          Why Choose Near2Door
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          <div className="bg-gray-100 p-8 rounded-xl shadow-md hover:scale-105 transition">
+            <span className="text-5xl">🤝</span>
+            <h3 className="text-xl font-bold text-yellow-600 mt-4 mb-2">
+              Trusted by Locals
+            </h3>
+            <p className="text-gray-600">
+              Every order supports and strengthens your local community.
+            </p>
+          </div>
+          <div className="bg-gray-100 p-8 rounded-xl shadow-md hover:scale-105 transition">
+            <span className="text-5xl">💳</span>
+            <h3 className="text-xl font-bold text-yellow-600 mt-4 mb-2">
+              Cash & UPI Accepted
+            </h3>
+            <p className="text-gray-600">
+              Pay however you like – we support both cash and UPI on delivery.
+            </p>
+          </div>
+          <div className="bg-gray-100 p-8 rounded-xl shadow-md hover:scale-105 transition">
+            <span className="text-5xl">🚀</span>
+            <h3 className="text-xl font-bold text-yellow-600 mt-4 mb-2">
+              Fast & Reliable
+            </h3>
+            <p className="text-gray-600">
+              Quick deliveries powered by dedicated local agents near you.
+            </p>
           </div>
         </div>
-      </div>
+      </section>
+
+      {/* Final Call to Action */}
+      <section className="bg-yellow-400 py-20 text-center">
+        <h2 className="text-4xl font-extrabold text-gray-900 mb-6">
+          Ready to Get Started?
+        </h2>
+        <p className="text-lg text-gray-800 mb-8">
+          Join as a Customer, Shop, or Delivery Agent today.
+        </p>
+        <button className="px-8 py-3 bg-gray-900 text-yellow-400 text-lg font-bold rounded-full shadow-xl hover:bg-gray-800 transform hover:scale-105 transition">
+          Join Now
+        </button>
+      </section>
     </div>
   );
 };
