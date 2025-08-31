@@ -88,7 +88,7 @@ def auth_register():
             "role": user_role,
             "created_at": datetime.datetime.utcnow(),
             "meta": payload.get("meta", {}),
-            "shop_id": shop_id, # Link the user to the new shop
+            "shop_id": shop_id,
         }
         res = users_col.insert_one(user)
         user['id'] = str(res.inserted_id)
@@ -117,12 +117,15 @@ def auth_login():
 # ---- SHOPS ----
 @bp.route("/shops", methods=["GET"])
 def shops_get():
-    status = request.args.get("status")
-    q = {"status": "open"}
-    if status:
-        q["status"] = status
-    docs = list(shops_col.find(q))
-    return jsonify([to_jsonable(d) for d in docs]), 200
+    try:
+        status = request.args.get("status")
+        q = {"status": "open"}
+        if status:
+            q["status"] = status
+        docs = list(shops_col.find(q))
+        return jsonify([to_jsonable(d) for d in docs]), 200
+    except Exception as e:
+        return jsonify({"error": "Internal server error", "details": str(e)}), 500
 
 @bp.route("/shops", methods=["POST"])
 def shops_post():
@@ -150,6 +153,10 @@ def shops_get_by_id(shop_id):
     shop = shops_col.find_one({"_id": _id})
     if not shop:
         return jsonify({"error": "not found"}), 404
+
+    products_docs = list(products_col.find({"shop_id": shop_id}))
+    shop['products'] = products_docs
+
     return jsonify(to_jsonable(shop)), 200
 
 @bp.route("/shops/<shop_id>", methods=["PUT"])

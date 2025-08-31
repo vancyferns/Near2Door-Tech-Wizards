@@ -6,14 +6,14 @@ const Header = ({ onNavigate, onLogout }) => {
   const { user } = useAuth();
   const role = user ? user.role : 'guest';
 
-  // These links are now always available for all users
+  // These links are always available
   const publicLinks = [
     { name: 'Home', path: 'landing' },
     { name: 'About', path: 'about' },
     { name: 'How It Works', path: 'how-it-works' },
   ];
 
-  // These links are shown only when a user is logged in
+  // Links shown only for logged-in users depending on role
   const privateLinks = (userRole) => {
     switch (userRole) {
       case 'shop':
@@ -30,6 +30,10 @@ const Header = ({ onNavigate, onLogout }) => {
         return [
           { name: 'Admin Dashboard', path: 'admin-dashboard' },
         ];
+      case 'agent': // ✅ Added for delivery agents
+        return [
+          { name: 'Agent Dashboard', path: 'agent-dashboard' },
+        ];
       default:
         return [];
     }
@@ -43,11 +47,14 @@ const Header = ({ onNavigate, onLogout }) => {
   };
 
   return (
-    <header className="bg-gray-900 text-white p-4 shadow-lg ">
+    <header className="bg-gray-900 text-white p-4 shadow-lg">
       <nav className="flex items-center justify-between flex-wrap">
+        {/* Logo / Brand */}
         <div className="flex items-center flex-shrink-0 text-white mr-6">
           <span className="font-semibold text-xl tracking-tight">Near2Door</span>
         </div>
+
+        {/* Mobile menu toggle */}
         <div className="block lg:hidden">
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -63,7 +70,13 @@ const Header = ({ onNavigate, onLogout }) => {
             </svg>
           </button>
         </div>
-        <div className={`w-full block flex-grow lg:flex lg:items-center lg:w-auto ${isMenuOpen ? '' : 'hidden'}`}>
+
+        {/* Navigation links */}
+        <div
+          className={`w-full block flex-grow lg:flex lg:items-center lg:w-auto ${
+            isMenuOpen ? '' : 'hidden'
+          }`}
+        >
           <div className="text-sm lg:flex-grow">
             {links.map((link, index) => (
               <button
@@ -75,6 +88,8 @@ const Header = ({ onNavigate, onLogout }) => {
               </button>
             ))}
           </div>
+
+          {/* User controls */}
           <div className="relative">
             {user ? (
               <div className="flex items-center mt-4 lg:mt-0">

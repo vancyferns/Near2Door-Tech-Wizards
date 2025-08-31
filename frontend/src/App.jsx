@@ -10,53 +10,77 @@ import SignUp from './pages/auth/SignUp';
 import ShopDashboard from './pages/shop/ShopDashboard';
 import ManageProducts from './pages/shop/ManageProducts';
 import ManageOrders from './pages/shop/ManageOrders';
-import ManageShopProfile from './pages/shop/ManageShopProfile'; // New import
+import ManageShopProfile from './pages/shop/ManageShopProfile';
 import CustomerDashboard from './pages/customer/CustomerDashboard';
 import BrowseShops from './pages/customer/BrowseShops';
+import ShopProducts from './pages/customer/ShopProducts';
 import DeliveryDashboard from './pages/delivery/DeliveryDashboard';
 import AdminDashboard from './pages/admin/AdminDashboard';
 
-// --- Main App Component ---
 function App() {
   const [page, setPage] = useState('landing');
+  const [pageProps, setPageProps] = useState({});
   const { user, isAuthenticated, logout } = useAuth();
+
+  const onNavigate = (path, props = {}) => {
+    setPage(path);
+    setPageProps(props);
+  };
 
   const renderPage = () => {
     const userRole = user ? user.role : 'guest';
-    const isProtected = ['shop-dashboard', 'manage-products', 'manage-orders', 'manage-shop-profile', 'customer-dashboard', 'browse-shops', 'delivery-dashboard', 'admin-dashboard'].includes(page);
-    
+    const protectedPages = [
+      'shop-dashboard',
+      'manage-products',
+      'manage-orders',
+      'manage-shop-profile',
+      'customer-dashboard',
+      'browse-shops',
+      'shop-products',
+      'agent-dashboard',
+      'admin-dashboard',
+    ];
+
+    const isProtected = protectedPages.includes(page);
+
+    // If not logged in but trying to access protected page → Sign In
     if (isProtected && !isAuthenticated) {
-      return <SignIn onNavigate={setPage} />;
+      return <SignIn onNavigate={onNavigate} />;
     }
-    
+
+    // Role-based access
     const roleAccess = {
-      'shop': ['shop-dashboard', 'manage-products', 'manage-orders', 'manage-shop-profile'],
-      'customer': ['customer-dashboard', 'browse-shops'],
-      'delivery-agent': ['delivery-dashboard'],
-      'admin': ['admin-dashboard'],
+      shop: ['shop-dashboard', 'manage-products', 'manage-orders', 'manage-shop-profile'],
+      customer: ['customer-dashboard', 'browse-shops', 'shop-products'],
+      agent: ['agent-dashboard'],
+      admin: ['admin-dashboard'],
     };
 
     if (isProtected && !roleAccess[userRole]?.includes(page)) {
-      if (userRole === 'shop') return <ShopDashboard onNavigate={setPage} />;
-      if (userRole === 'customer') return <CustomerDashboard onNavigate={setPage} />;
-      return <Landing onNavigate={setPage} />;
+      if (userRole === 'shop') return <ShopDashboard onNavigate={onNavigate} />;
+      if (userRole === 'customer') return <CustomerDashboard onNavigate={onNavigate} />;
+      if (userRole === 'agent') return <DeliveryDashboard onNavigate={onNavigate} />;
+      if (userRole === 'admin') return <AdminDashboard onNavigate={onNavigate} />;
+      return <Landing onNavigate={onNavigate} />;
     }
 
+    // Routing
     switch (page) {
-      case 'landing': return <Landing onNavigate={setPage} />;
+      case 'landing': return <Landing onNavigate={onNavigate} />;
       case 'about': return <About />;
       case 'how-it-works': return <HowItWorks />;
-      case 'signin': return <SignIn onNavigate={setPage} />;
-      case 'signup': return <SignUp onNavigate={setPage} />;
-      case 'shop-dashboard': return <ShopDashboard onNavigate={setPage} />;
-      case 'manage-products': return <ManageProducts onNavigate={setPage} />;
-      case 'manage-orders': return <ManageOrders onNavigate={setPage} />;
-      case 'manage-shop-profile': return <ManageShopProfile onNavigate={setPage} />;
-      case 'customer-dashboard': return <CustomerDashboard onNavigate={setPage} />;
-      case 'browse-shops': return <BrowseShops onNavigate={setPage} />;
-      case 'delivery-dashboard': return <DeliveryDashboard onNavigate={setPage} />;
-      case 'admin-dashboard': return <AdminDashboard onNavigate={setPage} />;
-      default: return <Landing onNavigate={setPage} />;
+      case 'signin': return <SignIn onNavigate={onNavigate} />;
+      case 'signup': return <SignUp onNavigate={onNavigate} />;
+      case 'shop-dashboard': return <ShopDashboard onNavigate={onNavigate} />;
+      case 'manage-products': return <ManageProducts onNavigate={onNavigate} />;
+      case 'manage-orders': return <ManageOrders onNavigate={onNavigate} />;
+      case 'manage-shop-profile': return <ManageShopProfile onNavigate={onNavigate} />;
+      case 'customer-dashboard': return <CustomerDashboard onNavigate={onNavigate} />;
+      case 'browse-shops': return <BrowseShops onNavigate={onNavigate} />;
+      case 'shop-products': return <ShopProducts onNavigate={onNavigate} shopId={pageProps.shopId} />;
+      case 'agent-dashboard': return <DeliveryDashboard onNavigate={onNavigate} />;
+      case 'admin-dashboard': return <AdminDashboard onNavigate={onNavigate} />;
+      default: return <Landing onNavigate={onNavigate} />;
     }
   };
 
@@ -67,7 +91,7 @@ function App() {
       `}</style>
       <script src="https://cdn.tailwindcss.com"></script>
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-lime-200 flex flex-col">
-        <Header onNavigate={setPage} user={user} onLogout={logout} />
+        <Header onNavigate={onNavigate} user={user} onLogout={logout} />
         <main className="flex-grow container mx-auto p-4 sm:p-8">
           {renderPage()}
         </main>

@@ -25,6 +25,61 @@ const api = {
     const data = await response.json();
     return { response, data };
   },
+  
+  getUserById: async (userId, token) => {
+    const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    if (response.ok) {
+      return response.json();
+    }
+    return null;
+  },
+
+  // Shops
+  getShops: async () => {
+    const response = await fetch(`${API_BASE_URL}/shops`);
+    if (response.ok) {
+      return response.json();
+    }
+    throw new Error('Failed to fetch shops');
+  },
+  
+  getShopProfile: async (shopId) => {
+    const response = await fetch(`${API_BASE_URL}/shops/${shopId}`);
+    if (response.ok) {
+      return response.json();
+    }
+    return null;
+  },
+
+  updateShopProfile: async (shopId, profileData) => {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${API_BASE_URL}/shops/${shopId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(profileData),
+    });
+    if (response.ok) {
+      return response.json();
+    }
+    throw new Error('Failed to update shop profile');
+  },
+
+  getShopSalesSummary: async (shopId) => {
+    console.log(`Fetching sales summary for shop ID: ${shopId}`);
+    return {
+      totalOrders: 15,
+      totalProductsSold: 250,
+      totalRevenue: 5000
+    };
+  },
 
   // Products
   getProducts: async (shopId) => {
@@ -74,28 +129,7 @@ const api = {
     return response.ok;
   },
   
-  getUserById: async (userId, token) => {
-    const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-    });
-    if (response.ok) {
-      return response.json();
-    }
-    return null;
-  },
-
-  getShopSalesSummary: async (shopId) => {
-    console.log(`Fetching sales summary for shop ID: ${shopId}`);
-    return {
-      totalOrders: 15,
-      totalProductsSold: 250,
-      totalRevenue: 5000
-    };
-  },
-
+  // Image Upload
   uploadImage: async (file) => {
     const formData = new FormData();
     formData.append('file', file);
@@ -112,31 +146,56 @@ const api = {
       return null;
     }
   },
+};
 
-  // Correctly integrated functions for managing shop profile
-  getShopProfile: async (shopId) => {
-    const response = await fetch(`${API_BASE_URL}/shops/${shopId}`);
-    if (response.ok) {
-      return response.json();
-    }
-    return null;
-  },
-
-  updateShopProfile: async (shopId, profileData) => {
-    const token = localStorage.getItem('token');
-    const response = await fetch(`${API_BASE_URL}/shops/${shopId}`, {
-      method: 'PUT',
+// --- Delivery Agent APIs ---
+api.getAgentOrders = async (agentId) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/agents/${agentId}/orders`, {
+      method: "GET",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify(profileData),
     });
-    if (response.ok) {
-      return response.json();
-    }
-    throw new Error('Failed to update shop profile');
-  },
+    const data = await response.json();
+    return { response, data };
+  } catch (error) {
+    console.error("Error fetching agent orders:", error);
+    return { response: { ok: false }, data: { error: "Network error" } };
+  }
+};
+
+api.getAgentEarnings = async (agentId) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/agents/${agentId}/earnings`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    const data = await response.json();
+    return { response, data };
+  } catch (error) {
+    console.error("Error fetching agent earnings:", error);
+    return { response: { ok: false }, data: { error: "Network error" } };
+  }
+};
+
+api.updateDeliveryStatus = async (orderId, status) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/orders/${orderId}/delivery-status`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ status }),
+    });
+    const data = await response.json();
+    return { response, data };
+  } catch (error) {
+    console.error("Error updating delivery status:", error);
+    return { response: { ok: false }, data: { error: "Network error" } };
+  }
 };
 
 export default api;
