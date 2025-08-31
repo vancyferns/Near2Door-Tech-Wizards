@@ -16,10 +16,12 @@ import BrowseShops from './pages/customer/BrowseShops';
 import ShopProducts from './pages/customer/ShopProducts';
 import DeliveryDashboard from './pages/delivery/DeliveryDashboard';
 import AdminDashboard from './pages/admin/AdminDashboard';
+import Cart from './pages/customer/Cart';
 
 function App() {
   const [page, setPage] = useState('landing');
   const [pageProps, setPageProps] = useState({});
+  const [cart, setCart] = useState([]); // <-- Cart state
   const { user, isAuthenticated, logout } = useAuth();
 
   const onNavigate = (path, props = {}) => {
@@ -39,19 +41,18 @@ function App() {
       'shop-products',
       'agent-dashboard',
       'admin-dashboard',
+      'cart'
     ];
 
     const isProtected = protectedPages.includes(page);
 
-    // If not logged in but trying to access protected page → Sign In
     if (isProtected && !isAuthenticated) {
       return <SignIn onNavigate={onNavigate} />;
     }
 
-    // Role-based access
     const roleAccess = {
       shop: ['shop-dashboard', 'manage-products', 'manage-orders', 'manage-shop-profile'],
-      customer: ['customer-dashboard', 'browse-shops', 'shop-products'],
+      customer: ['customer-dashboard', 'browse-shops', 'shop-products', 'cart'],
       agent: ['agent-dashboard'],
       admin: ['admin-dashboard'],
     };
@@ -64,7 +65,6 @@ function App() {
       return <Landing onNavigate={onNavigate} />;
     }
 
-    // Routing
     switch (page) {
       case 'landing': return <Landing onNavigate={onNavigate} />;
       case 'about': return <About />;
@@ -76,10 +76,11 @@ function App() {
       case 'manage-orders': return <ManageOrders onNavigate={onNavigate} />;
       case 'manage-shop-profile': return <ManageShopProfile onNavigate={onNavigate} />;
       case 'customer-dashboard': return <CustomerDashboard onNavigate={onNavigate} />;
-      case 'browse-shops': return <BrowseShops onNavigate={onNavigate} />;
-      case 'shop-products': return <ShopProducts onNavigate={onNavigate} shopId={pageProps.shopId} />;
+      case 'browse-shops': return <BrowseShops onNavigate={onNavigate} onAddToCart={(item) => setCart([...cart, item])} />;
+      case 'shop-products': return <ShopProducts onNavigate={onNavigate} shopId={pageProps.shopId} onAddToCart={(item) => setCart([...cart, item])} />;
       case 'agent-dashboard': return <DeliveryDashboard onNavigate={onNavigate} />;
       case 'admin-dashboard': return <AdminDashboard onNavigate={onNavigate} />;
+      case 'cart': return <Cart cart={cart} onUpdateCart={setCart} onNavigate={onNavigate} />;
       default: return <Landing onNavigate={onNavigate} />;
     }
   };

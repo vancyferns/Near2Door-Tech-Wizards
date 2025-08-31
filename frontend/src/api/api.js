@@ -198,4 +198,19 @@ api.updateDeliveryStatus = async (orderId, status) => {
   }
 };
 
+api.placeOrder = async (payload) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/orders`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await response.json();
+    return { ok: response.ok, data };
+  } catch (error) {
+    console.error("Order placement failed:", error);
+    return { ok: false, data: { error: "Network error" } };
+  }
+};
+
 export default api;

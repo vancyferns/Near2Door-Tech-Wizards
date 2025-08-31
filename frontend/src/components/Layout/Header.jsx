@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-
 const Header = ({ onNavigate, onLogout }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user } = useAuth();
@@ -25,6 +24,7 @@ const Header = ({ onNavigate, onLogout }) => {
         return [
           { name: 'Dashboard', path: 'customer-dashboard' },
           { name: 'Browse Shops', path: 'browse-shops' },
+          { name: 'Cart', path: 'cart' },
         ];
       case 'admin':
         return [
