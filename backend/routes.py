@@ -32,40 +32,49 @@ def to_jsonable(doc):
 # ---- AUTH ----
 @bp.route("/auth/register", methods=["POST"])
 def auth_register():
-    payload = request.json or {}
-    required = ["name", "email", "password"]
-    for r in required:
-        if r not in payload:
-            return jsonify({"error": f"{r} is required"}), 400
+    try:
+        payload = request.json or {}
+        required = ["name", "email", "password"]
+        for r in required:
+            if r not in payload:
+                return jsonify({"error": f"{r} is required"}), 400
 
-    if users_col.find_one({"email": payload["email"]}):
-        return jsonify({"error": "Email already registered"}), 409
+        if users_col.find_one({"email": payload["email"]}):
+            return jsonify({"error": "Email already registered"}), 409
 
-    user = {
-        "name": payload["name"],
-        "email": payload["email"],
-        "password": payload["password"],
-        "role": payload.get("role", "customer"),
-        "created_at": datetime.datetime.utcnow(),
-        "meta": payload.get("meta", {}),
-    }
-    res = users_col.insert_one(user)
-    return jsonify({"message": "registered", "user": to_jsonable(user)}), 201
+        user = {
+            "name": payload["name"],
+            "email": payload["email"],
+            "password": payload["password"],
+            "role": payload.get("role", "customer"),
+            "created_at": datetime.datetime.utcnow(),
+            "meta": payload.get("meta", {}),
+        }
+        res = users_col.insert_one(user)
+        # Add the ID to the user object before returning
+        user['id'] = str(res.inserted_id)
+        return jsonify({"message": "registered", "user": to_jsonable(user)}), 201
+    except Exception as e:
+        # Catch any exceptions and return a 500 error with a descriptive message
+        return jsonify({"error": "Internal server error", "details": str(e)}), 500
 
 @bp.route("/auth/login", methods=["POST"])
 def auth_login():
-    payload = request.json or {}
-    email = payload.get("email")
-    password = payload.get("password")
-    if not email or not password:
-        return jsonify({"error": "email and password required"}), 400
+    try:
+        payload = request.json or {}
+        email = payload.get("email")
+        password = payload.get("password")
+        if not email or not password:
+            return jsonify({"error": "email and password required"}), 400
 
-    user = users_col.find_one({"email": email})
-    if not user or user.get("password") != password:
-        return jsonify({"error": "invalid credentials"}), 401
+        user = users_col.find_one({"email": email})
+        if not user or user.get("password") != password:
+            return jsonify({"error": "invalid credentials"}), 401
 
-    token = f"dummy-token-{str(user['_id'])}"
-    return jsonify({"message": "ok", "token": token, "user": to_jsonable(user)}), 200
+        token = f"dummy-token-{str(user['_id'])}"
+        return jsonify({"message": "ok", "token": token, "user": to_jsonable(user)}), 200
+    except Exception as e:
+        return jsonify({"error": "Internal server error", "details": str(e)}), 500
 
 # ---- SHOPS ----
 @bp.route("/shops", methods=["GET"])
@@ -84,7 +93,7 @@ def shops_post():
         return jsonify({"error": "name is required"}), 400
     shop = {
         "name": payload["name"],
-        "owner_id": payload.get("ownerId"), # Change to owner_id
+        "owner_id": payload.get("ownerId"),
         "location": payload.get("location"),
         "status": payload.get("status", "pending"),
         "subscription": payload.get("subscription", {}),
@@ -92,12 +101,7 @@ def shops_post():
         "meta": payload.get("meta", {}),
     }
     res = shops_col.insert_one(shop)
-
-    # Find the newly inserted document by its ID
-    # This ensures you have the complete, up-to-date document from the database
     new_shop_doc = shops_col.find_one({"_id": res.inserted_id})
-
-    # Convert the new document to a JSON-serializable format and return it
     return jsonify(to_jsonable(new_shop_doc)), 201
 
 @bp.route("/shops/<shop_id>", methods=["GET"])
