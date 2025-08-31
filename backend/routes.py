@@ -2,8 +2,19 @@ from flask import Blueprint, jsonify, request
 from bson.objectid import ObjectId
 from db import users_col, shops_col, products_col, orders_col, agents_col, finances_col
 import datetime
+import cloudinary
+import cloudinary.uploader
+import os
+import requests
 
 bp = Blueprint("routes", __name__)
+
+# Cloudinary configuration
+cloudinary.config(
+    cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
+    api_key=os.getenv("CLOUDINARY_API_KEY"),
+    api_secret=os.getenv("CLOUDINARY_API_SECRET"),
+)
 
 # ---- helpers ----
 def oid(id_str):
@@ -29,6 +40,22 @@ def to_jsonable(doc):
         return d
     return doc
 
+# ---- Image Upload Endpoint ----
+@bp.route("/upload/image", methods=["POST"])
+def upload_image():
+    if 'file' not in request.files:
+        return jsonify({"error": "No file part in the request"}), 400
+    
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
+    
+    try:
+        upload_result = cloudinary.uploader.upload(file)
+        return jsonify({"url": upload_result['secure_url']}), 200
+    except Exception as e:
+        return jsonify({"error": "Image upload failed", "details": str(e)}), 500
+
 # ---- AUTH ----
 @bp.route("/auth/register", methods=["POST"])
 def auth_register():
@@ -41,21 +68,32 @@ def auth_register():
 
         if users_col.find_one({"email": payload["email"]}):
             return jsonify({"error": "Email already registered"}), 409
-
+        
+        user_role = payload.get("role", "customer")
+        shop_id = None
+        if user_role == "shop":
+            # Create a new shop document first
+            shop_doc = {
+                "name": payload["name"],
+                "status": "pending",
+                "created_at": datetime.datetime.utcnow(),
+            }
+            shop_res = shops_col.insert_one(shop_doc)
+            shop_id = str(shop_res.inserted_id)
+            
         user = {
             "name": payload["name"],
             "email": payload["email"],
             "password": payload["password"],
-            "role": payload.get("role", "customer"),
+            "role": user_role,
             "created_at": datetime.datetime.utcnow(),
             "meta": payload.get("meta", {}),
+            "shop_id": shop_id, # Link the user to the new shop
         }
         res = users_col.insert_one(user)
-        # Add the ID to the user object before returning
         user['id'] = str(res.inserted_id)
         return jsonify({"message": "registered", "user": to_jsonable(user)}), 201
     except Exception as e:
-        # Catch any exceptions and return a 500 error with a descriptive message
         return jsonify({"error": "Internal server error", "details": str(e)}), 500
 
 @bp.route("/auth/login", methods=["POST"])
@@ -112,11 +150,29 @@ def shops_get_by_id(shop_id):
     shop = shops_col.find_one({"_id": _id})
     if not shop:
         return jsonify({"error": "not found"}), 404
-
-    products_docs = list(products_col.find({"shop_id": shop_id}))
-    shop['products'] = products_docs
-
     return jsonify(to_jsonable(shop)), 200
+
+@bp.route("/shops/<shop_id>", methods=["PUT"])
+def shops_put_by_id(shop_id):
+    _id = oid(shop_id)
+    if not _id:
+        return jsonify({"error": "invalid shop id"}), 400
+    payload = request.json or {}
+    update_fields = {}
+    for key in ["name", "type", "location", "status", "profileImage"]:
+        if key in payload:
+            update_fields[key] = payload[key]
+    
+    if not update_fields:
+        return jsonify({"error": "No fields to update"}), 400
+    
+    result = shops_col.update_one({"_id": _id}, {"$set": update_fields})
+    
+    if result.matched_count == 0:
+        return jsonify({"error": "Shop not found"}), 404
+    
+    updated_shop = shops_col.find_one({"_id": _id})
+    return jsonify(to_jsonable(updated_shop)), 200
 
 # shop's products
 @bp.route("/shops/<shop_id>/products", methods=["GET"])
@@ -140,6 +196,7 @@ def shops_products_post(shop_id):
         "description": payload.get("description"),
         "price": payload["price"],
         "stock": payload.get("stock"),
+        "images": payload.get("images", []),
         "shop_id": shop_id,
         "created_at": datetime.datetime.utcnow()
     }
@@ -153,7 +210,7 @@ def shops_products_put(shop_id, product_id):
         return jsonify({"error": "invalid product id"}), 400
     payload = request.json or {}
     update = {}
-    for k in ("name", "description", "price", "stock"):
+    for k in ("name", "description", "price", "stock", "images"):
         if k in payload:
             update[k] = payload[k]
     if not update:
@@ -291,7 +348,7 @@ def users_user_orders_get(user_id):
 def admin_finances_get():
     total_orders = orders_col.count_documents({})
     total_revenue = sum(o.get('total_price', 0) for o in orders_col.find({}))
-    total_commission = total_revenue * 0.1 # Example commission rate
+    total_commission = total_revenue * 0.1
     return jsonify({"totalOrders": total_orders, "totalRevenue": total_revenue, "totalCommission": total_commission}), 200
 
 # ---- fallback for unimplemented routes: helpful response ----

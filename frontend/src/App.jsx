@@ -9,6 +9,8 @@ import SignIn from './pages/auth/SignIn';
 import SignUp from './pages/auth/SignUp';
 import ShopDashboard from './pages/shop/ShopDashboard';
 import ManageProducts from './pages/shop/ManageProducts';
+import ManageOrders from './pages/shop/ManageOrders';
+import ManageShopProfile from './pages/shop/ManageShopProfile'; // New import
 import CustomerDashboard from './pages/customer/CustomerDashboard';
 import BrowseShops from './pages/customer/BrowseShops';
 import DeliveryDashboard from './pages/delivery/DeliveryDashboard';
@@ -21,14 +23,14 @@ function App() {
 
   const renderPage = () => {
     const userRole = user ? user.role : 'guest';
-    const isProtected = ['shop-dashboard', 'manage-products', 'customer-dashboard', 'browse-shops', 'delivery-dashboard', 'admin-dashboard'].includes(page);
+    const isProtected = ['shop-dashboard', 'manage-products', 'manage-orders', 'manage-shop-profile', 'customer-dashboard', 'browse-shops', 'delivery-dashboard', 'admin-dashboard'].includes(page);
     
     if (isProtected && !isAuthenticated) {
       return <SignIn onNavigate={setPage} />;
     }
     
     const roleAccess = {
-      'shop': ['shop-dashboard', 'manage-products'],
+      'shop': ['shop-dashboard', 'manage-products', 'manage-orders', 'manage-shop-profile'],
       'customer': ['customer-dashboard', 'browse-shops'],
       'delivery-agent': ['delivery-dashboard'],
       'admin': ['admin-dashboard'],
@@ -48,6 +50,8 @@ function App() {
       case 'signup': return <SignUp onNavigate={setPage} />;
       case 'shop-dashboard': return <ShopDashboard onNavigate={setPage} />;
       case 'manage-products': return <ManageProducts onNavigate={setPage} />;
+      case 'manage-orders': return <ManageOrders onNavigate={setPage} />;
+      case 'manage-shop-profile': return <ManageShopProfile onNavigate={setPage} />;
       case 'customer-dashboard': return <CustomerDashboard onNavigate={setPage} />;
       case 'browse-shops': return <BrowseShops onNavigate={setPage} />;
       case 'delivery-dashboard': return <DeliveryDashboard onNavigate={setPage} />;
