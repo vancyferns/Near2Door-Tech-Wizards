@@ -1,3 +1,4 @@
+// No changes needed in this file, as it correctly passes the shopId to the next page.
 import React, { useState, useEffect } from 'react';
 import api from '../../api/api';
 
@@ -38,12 +39,12 @@ const BrowseShops = ({ onNavigate }) => {
     <div className="p-10 bg-white rounded-2xl shadow-2xl mt-8">
       <h2 className="text-3xl font-bold text-gray-900 mb-4">Browse Shops</h2>
       <p className="text-gray-600 mb-6">Explore a list of available local shops.</p>
-      
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {shops.length > 0 ? (
           shops.map(shop => (
-            <button 
-              key={shop.id} 
+            <button
+              key={shop.id}
               onClick={() => onNavigate('shop-products', { shopId: shop.id })}
               className="bg-gray-50 rounded-xl shadow-md p-6 transform transition-transform hover:scale-105 duration-300 text-left"
             >
