@@ -65,7 +65,7 @@ const api = {
   },
 
   // ---------------------
-  // Shop Orders (added)
+  // Shop Orders
   // ---------------------
   getShopOrders: async (shopId) => {
     try {
@@ -221,24 +221,25 @@ const api = {
       return [];
     }
   },
+
   updateOrderStatus: async (shopId, orderId, status) => {
-  const token = localStorage.getItem('token');
-  try {
-    const response = await fetch(`${API_BASE_URL}/shops/${shopId}/orders/${orderId}/status`, {
-      method: 'PUT',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({ status }),
-    });
-    if (!response.ok) throw new Error('Failed to update order status');
-    return response.json();
-  } catch (err) {
-    console.error('Error updating order status:', err);
-    throw err;
-  }
-},
+    const token = localStorage.getItem('token');
+    try {
+      const response = await fetch(`${API_BASE_URL}/shops/${shopId}/orders/${orderId}/status`, {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ status }),
+      });
+      if (!response.ok) throw new Error('Failed to update order status');
+      return response.json();
+    } catch (err) {
+      console.error('Error updating order status:', err);
+      throw err;
+    }
+  },
 
   // ---------------------
   // Optional: Helper to fetch customer geolocation
@@ -252,6 +253,29 @@ const api = {
         { enableHighAccuracy: true, timeout: 10000 }
       );
     }),
+};
+
+// ---------------------
+// Helper function outside of api
+// ---------------------
+export const fetchShopProfile = async (shopId, setShopProfile, setValues) => {
+  try {
+    const res = await api.getShopProfile(shopId);
+    const data = res?.shop || res;
+
+    if (data) {
+      setShopProfile(data);
+      setValues({
+        name: data.name || "",
+        type: data.type || "",
+        location: data.location || "",
+        status: data.status || "closed",
+        profileImage: data.profileImage || "",
+      });
+    }
+  } catch (e) {
+    console.error("Failed to fetch shop profile:", e);
+  }
 };
 
 export default api;
