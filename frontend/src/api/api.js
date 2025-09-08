@@ -25,38 +25,47 @@ const api = {
   },
 
   getUserById: async (userId, token) => {
-    const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
-      method: 'GET',
-      headers: { 'Authorization': `Bearer ${token}` },
-    });
-    if (response.ok) return response.json();
-    return null;
+    try {
+      const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      if (!response.ok) throw new Error('Failed to fetch user');
+      return response.json();
+    } catch (err) {
+      console.error('getUserById error:', err);
+      return null;
+    }
   },
 
   // ---------------------
   // Shops
   // ---------------------
-  getShops: async () => {
-    const response = await fetch(`${API_BASE_URL}/shops`);
-    if (response.ok) return response.json();
-    throw new Error('Failed to fetch shops');
-  },
-
   getShopProfile: async (shopId) => {
-    const response = await fetch(`${API_BASE_URL}/shops/${shopId}`);
-    if (response.ok) return response.json();
-    return null;
+    try {
+      const response = await fetch(`${API_BASE_URL}/shops/${shopId}`);
+      if (!response.ok) throw new Error('Failed to fetch shop profile');
+      return response.json();
+    } catch (err) {
+      console.error('getShopProfile error:', err);
+      return null;
+    }
   },
 
   updateShopProfile: async (shopId, profileData) => {
     const token = localStorage.getItem('token');
-    const response = await fetch(`${API_BASE_URL}/shops/${shopId}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-      body: JSON.stringify(profileData),
-    });
-    if (response.ok) return response.json();
-    throw new Error('Failed to update shop profile');
+    try {
+      const response = await fetch(`${API_BASE_URL}/shops/${shopId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify(profileData),
+      });
+      if (!response.ok) throw new Error('Failed to update shop profile');
+      return response.json();
+    } catch (err) {
+      console.error('updateShopProfile error:', err);
+      throw err;
+    }
   },
 
   getShopSalesSummary: async (shopId) => {
@@ -72,14 +81,10 @@ const api = {
       const token = localStorage.getItem('token');
       const response = await fetch(`${API_BASE_URL}/shops/${shopId}/orders`, {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
       });
       if (!response.ok) throw new Error("Failed to fetch shop orders");
-      const data = await response.json();
-      return data;
+      return response.json();
     } catch (error) {
       console.error("Error fetching shop orders:", error);
       return [];
@@ -90,37 +95,60 @@ const api = {
   // Products
   // ---------------------
   getProducts: async (shopId) => {
-    const response = await fetch(`${API_BASE_URL}/shops/${shopId}/products`);
-    return response.json();
+    try {
+      const response = await fetch(`${API_BASE_URL}/shops/${shopId}/products`);
+      if (!response.ok) throw new Error('Failed to fetch products');
+      return response.json();
+    } catch (err) {
+      console.error('getProducts error:', err);
+      return [];
+    }
   },
 
   addProduct: async (shopId, productData) => {
     const token = localStorage.getItem('token');
-    const response = await fetch(`${API_BASE_URL}/shops/${shopId}/products`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-      body: JSON.stringify(productData),
-    });
-    return response.json();
+    try {
+      const response = await fetch(`${API_BASE_URL}/shops/${shopId}/products`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify(productData),
+      });
+      if (!response.ok) throw new Error('Failed to add product');
+      return response.json();
+    } catch (err) {
+      console.error('addProduct error:', err);
+      return null;
+    }
   },
 
   updateProduct: async (shopId, productId, updatedData) => {
     const token = localStorage.getItem('token');
-    const response = await fetch(`${API_BASE_URL}/shops/${shopId}/products/${productId}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-      body: JSON.stringify(updatedData),
-    });
-    return response.json();
+    try {
+      const response = await fetch(`${API_BASE_URL}/shops/${shopId}/products/${productId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify(updatedData),
+      });
+      if (!response.ok) throw new Error('Failed to update product');
+      return response.json();
+    } catch (err) {
+      console.error('updateProduct error:', err);
+      return null;
+    }
   },
 
   deleteProduct: async (shopId, productId) => {
     const token = localStorage.getItem('token');
-    const response = await fetch(`${API_BASE_URL}/shops/${shopId}/products/${productId}`, {
-      method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${token}` },
-    });
-    return response.ok;
+    try {
+      const response = await fetch(`${API_BASE_URL}/shops/${shopId}/products/${productId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      return response.ok;
+    } catch (err) {
+      console.error('deleteProduct error:', err);
+      return false;
+    }
   },
 
   // ---------------------
@@ -131,38 +159,47 @@ const api = {
     formData.append('file', file);
     try {
       const response = await fetch(`${API_BASE_URL}/upload/image`, { method: 'POST', body: formData });
+      if (!response.ok) throw new Error('Image upload failed');
       const data = await response.json();
       return data.url;
     } catch (error) {
-      console.error('Image upload failed:', error);
+      console.error('uploadImage error:', error);
       return null;
+    }
+  },
+
+  // ---------------------
+  // Users (Shops & Agents)
+  // ---------------------
+  getUsers: async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_BASE_URL}/users`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: token ? `Bearer ${token}` : undefined,
+        },
+      });
+      if (!response.ok) throw new Error('Failed to fetch users');
+      return response.json();
+    } catch (error) {
+      console.error('getUsers error:', error);
+      return [];
     }
   },
 
   // ---------------------
   // Delivery Agent APIs
   // ---------------------
-  getAgents: async () => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/agents`, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      if (!response.ok) throw new Error('Failed to fetch agents');
-      return response.json();
-    } catch (error) {
-      console.error('Error fetching agents:', error);
-      return [];
-    }
-  },
-
   getAgentOrders: async (agentId) => {
     try {
       const response = await fetch(`${API_BASE_URL}/agents/${agentId}/orders`, { method: "GET", headers: { "Content-Type": "application/json" } });
+      if (!response.ok) throw new Error("Failed to fetch agent orders");
       const data = await response.json();
       return { response, data };
     } catch (error) {
-      console.error("Error fetching agent orders:", error);
+      console.error("getAgentOrders error:", error);
       return { response: { ok: false }, data: { error: "Network error" } };
     }
   },
@@ -170,10 +207,11 @@ const api = {
   getAgentEarnings: async (agentId) => {
     try {
       const response = await fetch(`${API_BASE_URL}/agents/${agentId}/earnings`, { method: "GET", headers: { "Content-Type": "application/json" } });
+      if (!response.ok) throw new Error("Failed to fetch agent earnings");
       const data = await response.json();
       return { response, data };
     } catch (error) {
-      console.error("Error fetching agent earnings:", error);
+      console.error("getAgentEarnings error:", error);
       return { response: { ok: false }, data: { error: "Network error" } };
     }
   },
@@ -185,10 +223,11 @@ const api = {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status }),
       });
+      if (!response.ok) throw new Error("Failed to update delivery status");
       const data = await response.json();
       return { response, data };
     } catch (error) {
-      console.error("Error updating delivery status:", error);
+      console.error("updateDeliveryStatus error:", error);
       return { response: { ok: false }, data: { error: "Network error" } };
     }
   },
@@ -206,7 +245,7 @@ const api = {
       const data = await response.json();
       return { ok: response.ok, data };
     } catch (error) {
-      console.error("Order placement failed:", error);
+      console.error("placeOrder error:", error);
       return { ok: false, data: { error: "Network error" } };
     }
   },
@@ -217,7 +256,7 @@ const api = {
       if (!response.ok) throw new Error("Failed to fetch customer orders");
       return response.json();
     } catch (error) {
-      console.error("Error fetching customer orders:", error);
+      console.error("getCustomerOrders error:", error);
       return [];
     }
   },
@@ -227,23 +266,17 @@ const api = {
     try {
       const response = await fetch(`${API_BASE_URL}/shops/${shopId}/orders/${orderId}/status`, {
         method: 'PUT',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ status }),
       });
       if (!response.ok) throw new Error('Failed to update order status');
       return response.json();
     } catch (err) {
-      console.error('Error updating order status:', err);
+      console.error('updateOrderStatus error:', err);
       throw err;
     }
   },
 
-  // ---------------------
-  // Optional: Helper to fetch customer geolocation
-  // ---------------------
   getCustomerLocation: () =>
     new Promise((resolve, reject) => {
       if (!navigator.geolocation) return reject("Geolocation not supported");
@@ -274,7 +307,7 @@ export const fetchShopProfile = async (shopId, setShopProfile, setValues) => {
       });
     }
   } catch (e) {
-    console.error("Failed to fetch shop profile:", e);
+    console.error("fetchShopProfile error:", e);
   }
 };
 

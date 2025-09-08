@@ -91,9 +91,9 @@ function App() {
         body { font-family: 'Inter', sans-serif; }
       `}</style>
       <script src="https://cdn.tailwindcss.com"></script>
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-lime-200 flex flex-col">
+      <div className="min-h-screen bg-slate-900 flex flex-col overflow-hidden">
         <Header onNavigate={onNavigate} user={user} onLogout={logout} />
-        <main className="flex-grow container mx-auto p-4 sm:p-8">
+        <main className="flex-grow px-2 sm:px-4 py-4 sm:py-8">
           {renderPage()}
         </main>
         <Footer />

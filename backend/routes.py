@@ -86,6 +86,11 @@ def auth_register():
             "meta": payload.get("meta", {}),
             "shop_id": shop_id,
         }
+        
+        # New logic to set user status to "pending" for shop and agent roles
+        if user_role in ["shop", "agent"]:
+            user["status"] = "pending"
+
         res = users_col.insert_one(user)
         user["_id"] = res.inserted_id
         return jsonify({"message": "registered", "user": to_jsonable(user)}), 201
@@ -104,6 +109,10 @@ def auth_login():
         user = users_col.find_one({"email": email})
         if not user or user.get("password") != password:
             return jsonify({"error": "invalid credentials"}), 401
+        
+        # New logic to block pending users from logging in
+        if user.get("status") == "pending":
+            return jsonify({"error": "Your profile has not yet been verified. Kindly be patient."}), 403
 
         token = f"dummy-token-{str(user['_id'])}"
         return jsonify({"message": "ok", "token": token, "user": to_jsonable(user)}), 200
@@ -354,6 +363,35 @@ def agents_agent_orders(agent_id):
 def admin_agents_get():
     docs = list(agents_col.find({}))
     return jsonify(to_jsonable(docs)), 200
+    
+@bp.route("/admin/approve-user/<user_id>", methods=["PUT"])
+def approve_user(user_id):
+    """
+    Admin endpoint to approve a pending user (shop or agent).
+    Updates the user's status from "pending" to "approved".
+    """
+    _id = oid(user_id)
+    if not _id:
+        return jsonify({"error": "invalid user id"}), 400
+    
+    user = users_col.find_one({"_id": _id})
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+        
+    # Check the user's role to ensure we're approving an agent or shop
+    if user.get("role") not in ["shop", "agent"]:
+        return jsonify({"error": "Only shop and agent applications can be approved."}), 400
+        
+    result = users_col.update_one(
+        {"_id": _id},
+        {"$set": {"status": "approved", "updated_at": datetime.datetime.utcnow()}}
+    )
+    
+    if result.matched_count == 0:
+        return jsonify({"error": "User not found"}), 404
+        
+    updated_user = users_col.find_one({"_id": _id})
+    return jsonify({"success": True, "user": to_jsonable(updated_user)}), 200
 
 @bp.route("/admin/shops", methods=["GET"])
 def admin_shops_get():

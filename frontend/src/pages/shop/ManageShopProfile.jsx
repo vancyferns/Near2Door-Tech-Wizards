@@ -1,56 +1,6 @@
 import React, { useState, useEffect } from "react";
-
-// Mock `useAuth` hook and user data
-// This simulates the authentication context
-const useAuth = () => {
-  // A mock user with a shop ID to allow the app to run
-  const user = { shop_id: "mock_shop_id_12345" };
-  return { user };
-};
-
-// Mock API functions
-// These simulate network requests and will log their actions
-const api = {
-  getShopProfile: async (shopId) => {
-    console.log(`MOCK API: Fetching shop profile for ID: ${shopId}`);
-    // Simulate a successful API response with some mock data
-    return new Promise((resolve) =>
-      setTimeout(
-        () =>
-          resolve({
-            name: "The Green Grocer",
-            type: "Grocery",
-            location: "123 Main Street",
-            status: "open",
-            profileImage:
-              "https://placehold.co/100x100/4CAF50/FFFFFF?text=GG",
-          }),
-        500
-      )
-    );
-  },
-  updateShopProfile: async (shopId, profileData) => {
-    console.log(
-      `MOCK API: Updating profile for ID ${shopId} with data:`,
-      profileData
-    );
-    // Simulate a successful API response
-    return new Promise((resolve) => setTimeout(() => resolve({}), 500));
-  },
-  uploadImage: async (file) => {
-    console.log(`MOCK API: Uploading image file: ${file.name}`);
-    // Simulate a successful image upload and return a mock URL
-    return new Promise((resolve) =>
-      setTimeout(
-        () =>
-          resolve(
-            "https://placehold.co/100x100/4CAF50/FFFFFF?text=New+Image"
-          ),
-        500
-      )
-    );
-  },
-};
+import { useAuth } from "../../context/AuthContext";
+import api from "../../api/api";
 
 // Custom `useForm` hook
 const useForm = (initialValues, validate) => {
@@ -58,7 +8,7 @@ const useForm = (initialValues, validate) => {
   const [errors, setErrors] = useState({});
 
   const handleChange = (event) => {
-    const { name, value, type, checked } = event.target;
+    const { name, value, type } = event.target;
     setValues({
       ...values,
       [name]: type === "radio" ? value : value,
@@ -110,7 +60,7 @@ const Button = ({ children, type = "button", disabled }) => (
   </button>
 );
 
-// ShopLogo component is the same, so you can keep it as is.
+// ShopLogo component
 const ShopLogo = ({ name, imageUrl, size = "20" }) => {
   const initial = name
     ? name
@@ -374,9 +324,4 @@ const ManageShopProfile = () => {
   );
 };
 
-// Main App component to render the ManageShopProfile component
-const App = () => {
-    return <ManageShopProfile />;
-};
-
-export default App;
+export default ManageShopProfile;

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 
+// ShopLogo (unchanged)
 const ShopLogo = ({ name, imageUrl, onClick }) => {
-  const initials = name ? name[0].toUpperCase() : 'S'; // ✅ first letter only
-
+  const initials = name ? name[0].toUpperCase() : 'S';
   return (
     <div
       onClick={onClick}
@@ -20,7 +21,7 @@ const ShopLogo = ({ name, imageUrl, onClick }) => {
 
 const Header = ({ onNavigate, onLogout }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isProfileOpen, setIsProfileOpen] = useState(false); // ✅ profile dropdown
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const { user, shopProfile } = useAuth();
   const role = user?.role || 'guest';
 
@@ -33,9 +34,7 @@ const Header = ({ onNavigate, onLogout }) => {
   const privateLinks = (userRole) => {
     switch (userRole) {
       case 'shop':
-        return [
-          { name: 'Dashboard', path: 'shop-dashboard' },
-        ];
+        return [{ name: 'Dashboard', path: 'shop-dashboard' }];
       case 'customer':
         return [
           { name: 'Dashboard', path: 'customer-dashboard' },
@@ -56,11 +55,20 @@ const Header = ({ onNavigate, onLogout }) => {
   const handleLinkClick = (path) => {
     onNavigate(path);
     setIsMenuOpen(false);
-    setIsProfileOpen(false); // close dropdown
+    setIsProfileOpen(false);
   };
 
+  const getUserProfile = () => {
+    if (user?.role === 'shop') {
+      return { name: shopProfile?.name, imageUrl: shopProfile?.profileImage };
+    } else {
+      return { name: user?.name || user?.email, imageUrl: null };
+    }
+  };
+  const profile = getUserProfile();
+
   return (
-    <header className="bg-slate-900 text-white shadow-xl sticky top-0 z-50">
+    <header className="bg-gray-900 text-white shadow-2xl sticky top-0 z-50">
       <nav className="flex items-center justify-between flex-wrap p-6 max-w-7xl mx-auto">
         {/* Logo */}
         <div className="flex items-center flex-shrink-0">
@@ -88,75 +96,65 @@ const Header = ({ onNavigate, onLogout }) => {
           </button>
         </div>
 
-        {/* Links */}
-        <div
-          className={`w-full block flex-grow lg:flex lg:items-center lg:w-auto ${
-            isMenuOpen ? '' : 'hidden'
-          }`}
-        >
-          <div className="text-base lg:flex-grow font-bold">
+        {/* Links and User Controls */}
+        <div className="hidden lg:flex lg:items-center lg:w-auto w-full">
+          {/* Desktop Links */}
+          <div className="text-base flex flex-row items-center space-x-6 font-bold flex-grow justify-center">
             {links.map((link, index) => (
               <button
                 key={index}
                 onClick={() => handleLinkClick(link.path)}
-                className="block mt-4 lg:inline-block lg:mt-0 text-white font-bold mr-4 p-2 rounded transition duration-300 hover:text-lime-400 hover:bg-slate-800 focus:outline-none focus:text-lime-400"
+                className="text-white font-bold px-4 py-2 rounded transition duration-300 hover:text-lime-400 hover:bg-slate-800 focus:outline-none"
               >
                 {link.name}
               </button>
             ))}
           </div>
 
-          {/* User controls */}
-          <div className="flex flex-col lg:flex-row items-center space-y-4 lg:space-y-0 lg:space-x-4 mt-4 lg:mt-0 relative">
+          {/* Desktop User Controls */}
+          <div className="flex items-center space-x-4">
             {user ? (
               <>
-                <div className="flex items-center">
-                  <span className="text-gray-300 text-sm hidden sm:block font-semibold mr-2">
-                    Hello, {user.email}
-                  </span>
-                  <span className="text-sm px-2 py-1 bg-lime-400 text-slate-900 rounded-full font-bold">
-                    {user.role}
-                  </span>
-                </div>
-
-                {/* ✅ Profile dropdown for shop */}
-                {role === 'shop' && (
-                  <div className="relative">
-                    <ShopLogo
-                      name={shopProfile?.name}
-                      imageUrl={shopProfile?.profileImage}
-                      onClick={() => setIsProfileOpen(!isProfileOpen)}
-                    />
-                    {isProfileOpen && (
-                      <div className="absolute right-0 mt-2 w-48 bg-white text-gray-800 rounded-lg shadow-lg py-2 z-50">
+                <span className="text-sm px-2 py-1 bg-lime-400 text-slate-900 rounded-full font-bold">
+                  {user.role}
+                </span>
+                <div className="relative">
+                  <ShopLogo
+                    name={profile.name}
+                    imageUrl={profile.imageUrl}
+                    onClick={() => setIsProfileOpen(!isProfileOpen)}
+                  />
+                  {isProfileOpen && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white text-gray-800 rounded-lg shadow-lg py-2 z-50">
+                      {role === 'shop' && (
                         <button
                           onClick={() => handleLinkClick('manage-shop-profile')}
                           className="block w-full text-left px-4 py-2 hover:bg-lime-100"
                         >
                           Profile
                         </button>
-                        <button
-                          onClick={onLogout}
-                          className="block w-full text-left px-4 py-2 hover:bg-red-100 text-red-600"
-                        >
-                          Logout
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
+                      )}
+                      <button
+                        onClick={onLogout}
+                        className="block w-full text-left px-4 py-2 hover:bg-red-100 text-red-600"
+                      >
+                        Logout
+                      </button>
+                    </div>
+                  )}
+                </div>
               </>
             ) : (
               <>
                 <button
                   onClick={() => handleLinkClick('signin')}
-                  className="inline-block text-sm px-4 py-2 leading-none border-2 rounded-lg text-white border-lime-400 bg-slate-900 hover:text-lime-400 hover:border-lime-400 hover:bg-slate-800 font-bold transition duration-300"
+                  className="inline-block text-sm px-4 py-2 border-2 rounded-lg text-white border-lime-400 bg-slate-900 hover:text-lime-400 hover:border-lime-400 hover:bg-slate-800 font-bold transition duration-300"
                 >
                   Sign In
                 </button>
                 <button
                   onClick={() => handleLinkClick('signup')}
-                  className="inline-block text-sm px-4 py-2 leading-none border-2 rounded-lg text-white border-lime-400 bg-lime-600 hover:text-lime-400 hover:border-lime-400 hover:bg-lime-700 font-bold transition duration-300"
+                  className="inline-block text-sm px-4 py-2 border-2 rounded-lg text-white border-lime-400 bg-lime-600 hover:text-lime-400 hover:border-lime-400 hover:bg-lime-700 font-bold transition duration-300"
                 >
                   Sign Up
                 </button>
@@ -165,6 +163,61 @@ const Header = ({ onNavigate, onLogout }) => {
           </div>
         </div>
       </nav>
+
+      {/* Mobile Dropdown */}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="lg:hidden bg-slate-900 shadow-lg px-6 pb-6"
+          >
+            <div className="flex flex-col items-center space-y-4 font-bold">
+              {links.map((link, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleLinkClick(link.path)}
+                  className="w-full text-center text-white font-bold px-4 py-2 rounded transition duration-300 hover:text-lime-400 hover:bg-slate-800"
+                >
+                  {link.name}
+                </button>
+              ))}
+
+              {/* Mobile User Controls */}
+              {user ? (
+                <>
+                  <span className="text-sm px-2 py-1 bg-lime-400 text-slate-900 rounded-full font-bold">
+                    {user.role}
+                  </span>
+                  <button
+                    onClick={onLogout}
+                    className="w-full text-center px-4 py-2 text-red-600 hover:bg-red-100 rounded"
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={() => handleLinkClick('signin')}
+                    className="w-full text-center px-4 py-2 border-2 rounded-lg text-white border-lime-400 bg-slate-900 hover:text-lime-400 hover:border-lime-400 hover:bg-slate-800 font-bold transition duration-300"
+                  >
+                    Sign In
+                  </button>
+                  <button
+                    onClick={() => handleLinkClick('signup')}
+                    className="w-full text-center px-4 py-2 border-2 rounded-lg text-white border-lime-400 bg-lime-600 hover:text-lime-400 hover:border-lime-400 hover:bg-lime-700 font-bold transition duration-300"
+                  >
+                    Sign Up
+                  </button>
+                </>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 };

@@ -48,39 +48,39 @@ const ManageOrders = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'ready': return 'bg-blue-100 text-blue-800';
-      case 'picked up': return 'bg-purple-100 text-purple-800';
-      case 'delivered': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'pending': return 'bg-yellow-500/20 text-yellow-400 border border-yellow-400/30';
+      case 'ready': return 'bg-blue-500/20 text-blue-400 border border-blue-400/30';
+      case 'picked up': return 'bg-purple-500/20 text-purple-400 border border-purple-400/30';
+      case 'delivered': return 'bg-green-500/20 text-green-400 border border-green-400/30';
+      default: return 'bg-gray-500/20 text-gray-400 border border-gray-400/30';
     }
   };
 
   if (loading) {
     return (
-      <div className="p-10 bg-white rounded-3xl shadow-lg mt-8 text-center">
-        <p className="text-gray-600 text-lg animate-pulse">Loading orders...</p>
+      <div className="p-10 bg-slate-800 rounded-3xl shadow-xl mt-8 text-center">
+        <p className="text-gray-300 text-lg animate-pulse">Loading orders...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="p-10 bg-white rounded-3xl shadow-lg mt-8 text-center text-red-500 font-semibold">
+      <div className="p-10 bg-slate-800 rounded-3xl shadow-xl mt-8 text-center text-red-400 font-semibold">
         {error}
       </div>
     );
   }
 
   return (
-    <div className="bg-gray-100 min-h-screen py-16 px-4 sm:px-6 lg:px-8">
+    <div className="bg-slate-900 min-h-screen py-16 px-4 sm:px-6 lg:px-8 text-white font-sans">
       <div className="max-w-7xl mx-auto">
-        <div className="bg-white rounded-3xl shadow-xl p-6 sm:p-10">
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-2">
-            Order Management 📋
+        <div className="bg-slate-800 rounded-3xl shadow-xl p-6 sm:p-10">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-lime-400 mb-2 drop-shadow-lg">
+            Manage Orders 📋
           </h2>
-          <p className="text-gray-600 mb-6 sm:mb-8 text-lg">
-            View and update the status of incoming orders.
+          <p className="text-gray-300 mb-6 sm:mb-8 text-lg">
+            Track and update the status of your shop’s orders.
           </p>
 
           {orders.length === 0 ? (
@@ -92,27 +92,29 @@ const ManageOrders = () => {
               {orders.map(order => (
                 <li
                   key={order.id}
-                  className={`p-6 border border-gray-200 rounded-2xl shadow-sm transition-all duration-300 transform hover:shadow-lg ${
+                  className={`p-6 bg-slate-700/50 border border-slate-600 rounded-2xl shadow-lg transition-all duration-300 hover:scale-[1.01] ${
                     order.status === 'delivered' ? 'opacity-70' : ''
                   }`}
                 >
                   <div className="flex justify-between items-start mb-4">
                     <div>
-                      <h3 className="text-lg sm:text-xl font-bold text-gray-900">
+                      <h3 className="text-lg sm:text-xl font-bold text-white">
                         Order #{order.id.slice(-6)}
                       </h3>
-                      <p className="text-sm text-gray-500 mt-1">
-                        Total: <span className="font-semibold text-gray-900">₹{Number(order.total_price).toFixed(2)}</span>
+                      <p className="text-sm text-gray-400 mt-1">
+                        Total: <span className="font-semibold text-lime-400">₹{Number(order.total_price).toFixed(2)}</span>
                       </p>
                     </div>
-                    <span className={`py-1 px-3 rounded-full font-semibold text-sm ${getStatusColor(order.status)}`}>
+                    <span
+                      className={`py-1 px-3 rounded-full font-semibold text-sm ${getStatusColor(order.status)}`}
+                    >
                       {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                     </span>
                   </div>
 
                   <div className="mb-4">
-                    <h4 className="font-bold text-gray-900 mb-2">Items:</h4>
-                    <ul className="space-y-1 text-sm text-gray-600">
+                    <h4 className="font-bold text-gray-200 mb-2">Items:</h4>
+                    <ul className="space-y-1 text-sm text-gray-400">
                       {order.items?.map((item, idx) => (
                         <li key={idx} className="flex justify-between">
                           <span>{item.quantity} × {item.name}</span>
@@ -126,7 +128,7 @@ const ManageOrders = () => {
                     {order.status === 'pending' && (
                       <Button
                         onClick={() => updateOrderStatus(order.id, 'ready')}
-                        className="bg-green-600 hover:bg-green-700"
+                        className="bg-lime-600 hover:bg-lime-700 text-white font-semibold"
                       >
                         ✅ Mark as Ready
                       </Button>
@@ -134,7 +136,7 @@ const ManageOrders = () => {
                     {order.status === 'ready' && (
                       <Button
                         onClick={() => updateOrderStatus(order.id, 'picked up')}
-                        className="bg-blue-600 hover:bg-blue-700"
+                        className="bg-blue-600 hover:bg-blue-700 text-white font-semibold"
                       >
                         📦 Picked Up
                       </Button>
@@ -142,7 +144,7 @@ const ManageOrders = () => {
                     {order.status === 'picked up' && (
                       <Button
                         onClick={() => updateOrderStatus(order.id, 'delivered')}
-                        className="bg-lime-600 hover:bg-lime-700"
+                        className="bg-green-600 hover:bg-green-700 text-white font-semibold"
                       >
                         🎉 Delivered
                       </Button>
