@@ -28,9 +28,9 @@ const BrowseShops = ({ onNavigate }) => {
 
   if (loading) {
     return (
-      <div className="bg-slate-900 text-white min-h-[calc(100vh-140px)] py-16 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
-        <div className="p-10 bg-white rounded-3xl shadow-lg text-center">
-          <p className="text-gray-600 text-lg animate-pulse">Loading shops...</p>
+      <div className="bg-slate-900 text-white min-h-[calc(100vh-140px)] flex items-center justify-center py-16">
+        <div className="p-10 bg-slate-800 rounded-3xl shadow-lg text-center">
+          <p className="text-gray-300 text-lg animate-pulse">Loading shops...</p>
         </div>
       </div>
     );
@@ -38,8 +38,8 @@ const BrowseShops = ({ onNavigate }) => {
 
   if (error) {
     return (
-      <div className="bg-slate-900 text-white min-h-[calc(100vh-140px)] py-16 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
-        <div className="p-10 bg-white rounded-3xl shadow-lg text-center text-red-500 font-semibold">
+      <div className="bg-slate-900 text-white min-h-[calc(100vh-140px)] flex items-center justify-center py-16">
+        <div className="p-10 bg-slate-800 rounded-3xl shadow-lg text-center text-red-400 font-semibold">
           {error}
         </div>
       </div>
@@ -66,13 +66,13 @@ const BrowseShops = ({ onNavigate }) => {
               <button
                 key={shop.id}
                 onClick={() => onNavigate('shop-products', { shopId: shop.id })}
-                className="group bg-white rounded-3xl shadow-xl hover:shadow-2xl border border-transparent hover:border-lime-400 p-6 sm:p-8 text-left transform transition-all duration-300 hover:-translate-y-1"
+                className="group bg-slate-800 rounded-3xl shadow-xl hover:shadow-2xl border border-slate-700 hover:border-lime-400 p-6 sm:p-8 text-left transform transition-all duration-300 hover:-translate-y-1"
               >
                 {/* Shop image or placeholder */}
-                <div className="w-full h-40 sm:h-48 rounded-2xl bg-gray-100 flex items-center justify-center mb-4 overflow-hidden">
-                  {shop.image ? (
+                <div className="w-full h-40 sm:h-48 rounded-2xl bg-slate-700 flex items-center justify-center mb-4 overflow-hidden">
+                  {shop.profileImage ? (
                     <img
-                      src={shop.image}
+                      src={shop.profileImage}
                       alt={shop.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
@@ -81,11 +81,11 @@ const BrowseShops = ({ onNavigate }) => {
                   )}
                 </div>
 
-                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 group-hover:text-lime-700">
+                <h3 className="text-xl sm:text-2xl font-bold text-white mb-2 group-hover:text-lime-400">
                   {shop.name}
                 </h3>
-                <p className="text-gray-600 text-sm sm:text-base line-clamp-2">
-                  {shop.description || 'No description available.'}
+                <p className="text-gray-400 text-sm sm:text-base line-clamp-2">
+                  {shop.type || 'No description available.'}
                 </p>
 
                 <div className="flex items-center text-sm text-gray-500 mt-4">
@@ -104,13 +104,15 @@ const BrowseShops = ({ onNavigate }) => {
                     <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
                     <circle cx="12" cy="10" r="3" />
                   </svg>
-                  <span>{shop.location || 'Location not specified'}</span>
+                  <span className="text-gray-400">
+                    {shop.location || 'Location not specified'}
+                  </span>
                 </div>
               </button>
             ))
           ) : (
-            <div className="p-10 bg-white rounded-3xl shadow-lg text-center col-span-full">
-              <p className="text-gray-600 text-lg font-medium">
+            <div className="p-10 bg-slate-800 rounded-3xl shadow-lg text-center col-span-full">
+              <p className="text-gray-400 text-lg font-medium">
                 We couldn't find any shops right now. Please check back later!
               </p>
             </div>

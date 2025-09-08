@@ -41,6 +41,17 @@ const api = {
   // ---------------------
   // Shops
   // ---------------------
+  getShops: async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/shops`);
+      if (!response.ok) throw new Error('Failed to fetch shops');
+      return response.json();
+    } catch (err) {
+      console.error('getShops error:', err);
+      return [];
+    }
+  },
+
   getShopProfile: async (shopId) => {
     try {
       const response = await fetch(`${API_BASE_URL}/shops/${shopId}`);
@@ -70,6 +81,7 @@ const api = {
 
   getShopSalesSummary: async (shopId) => {
     console.log(`Fetching sales summary for shop ID: ${shopId}`);
+    // Replace with backend call if available
     return { totalOrders: 15, totalProductsSold: 250, totalRevenue: 5000 };
   },
 
@@ -86,7 +98,7 @@ const api = {
       if (!response.ok) throw new Error("Failed to fetch shop orders");
       return response.json();
     } catch (error) {
-      console.error("Error fetching shop orders:", error);
+      console.error("getShopOrders error:", error);
       return [];
     }
   },
@@ -189,9 +201,66 @@ const api = {
     }
   },
 
+  getShopsByStatus: async (status) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/admin/shops?status=${status}`);
+      if (!response.ok) throw new Error('Failed to fetch shops');
+      return response.json();
+    } catch (err) {
+      console.error('getShopsByStatus error:', err);
+      return [];
+    }
+  },
+
+  getAgentsByStatus: async (status) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/agents`);
+      if (!response.ok) throw new Error('Failed to fetch agents');
+      const agents = await response.json();
+      return agents.filter(agent => agent.status === status);
+    } catch (err) {
+      console.error('getAgentsByStatus error:', err);
+      return [];
+    }
+  },
+
+  approveShop: async (shopId) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/admin/shops/${shopId}/approve`, { method: 'PUT' });
+      return response.ok;
+    } catch (err) {
+      console.error('approveShop error:', err);
+      return false;
+    }
+  },
+
+  approveAgent: async (userId) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/admin/approve-user/${userId}`, { method: 'PUT' });
+      return response.ok;
+    } catch (err) {
+      console.error('approveAgent error:', err);
+      return false;
+    }
+  },
+
   // ---------------------
   // Delivery Agent APIs
   // ---------------------
+  getAgents: async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/agents`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (!response.ok) throw new Error('Failed to fetch agents');
+      return response.json();
+    } catch (error) {
+      console.error('getAgents error:', error);
+      return [];
+    }
+  },
+
   getAgentOrders: async (agentId) => {
     try {
       const response = await fetch(`${API_BASE_URL}/agents/${agentId}/orders`, { method: "GET", headers: { "Content-Type": "application/json" } });
@@ -277,6 +346,9 @@ const api = {
     }
   },
 
+  // ---------------------
+  // Helpers
+  // ---------------------
   getCustomerLocation: () =>
     new Promise((resolve, reject) => {
       if (!navigator.geolocation) return reject("Geolocation not supported");

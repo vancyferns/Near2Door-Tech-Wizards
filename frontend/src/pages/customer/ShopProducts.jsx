@@ -2,15 +2,15 @@ import React, { useState, useEffect } from 'react';
 import api from '../../api/api';
 import Button from '../../components/UI/Button';
 
-// ProductCard component remains the same. The change is in how it's used.
+// ProductCard component
 const ProductCard = ({ product, onAddToCart }) => {
   const handleAddToCart = () => {
     if (onAddToCart) onAddToCart(product);
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg overflow-hidden transition-transform duration-300 hover:scale-105">
-      <div className="relative w-full h-48 bg-gray-200">
+    <div className="bg-slate-800 rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:scale-105 hover:shadow-xl border border-gray-700">
+      <div className="relative w-full h-36 bg-slate-700">
         {product.images && product.images.length > 0 ? (
           <img
             src={product.images[0]}
@@ -23,11 +23,16 @@ const ProductCard = ({ product, onAddToCart }) => {
           </div>
         )}
       </div>
-      <div className="p-4">
-        <h3 className="font-bold text-xl mb-1 text-gray-900">{product.name}</h3>
-        <p className="text-sm text-gray-600 mb-2">{product.description}</p>
-        <p className="text-lg font-bold text-lime-600 mb-4">₹ {product.price}</p>
-        <Button onClick={handleAddToCart}>Add to Cart</Button>
+      <div className="p-3">
+        <h3 className="font-bold text-base mb-1 text-white truncate">{product.name}</h3>
+        <p className="text-xs text-gray-400 mb-2 line-clamp-2">{product.description}</p>
+        <p className="text-sm font-bold text-lime-400 mb-3">₹ {product.price}</p>
+        <Button 
+          onClick={handleAddToCart} 
+          className="w-full bg-lime-600 hover:bg-lime-500 text-white py-1.5 rounded-md font-medium text-sm transition"
+        >
+          Add to Cart
+        </Button>
       </div>
     </div>
   );
@@ -60,19 +65,17 @@ const ShopProducts = ({ onNavigate, shopId, onAddToCart }) => {
     fetchProducts();
   }, [shopId]);
 
-  // Updated handleAdd to pass the product and shopId to onAddToCart
   const handleAdd = (product) => {
-    if (onAddToCart) onAddToCart(product, shopId); // Pass shopId here
+    if (onAddToCart) onAddToCart(product, shopId);
 
-    // Show toast
-    setToastMessage(`Added "${product.name}" to cart`);
+    setToastMessage(`✅ "${product.name}" added to cart`);
     setShowToast(true);
-    setTimeout(() => setShowToast(false), 2000); // auto-hide after 2 sec
+    setTimeout(() => setShowToast(false), 2500);
   };
 
   if (loading) {
     return (
-      <div className="p-10 bg-white rounded-2xl shadow-2xl mt-8 text-center">
+      <div className="p-10 bg-gray-900 rounded-2xl shadow-2xl mt-8 text-center text-gray-300">
         Loading products...
       </div>
     );
@@ -80,30 +83,30 @@ const ShopProducts = ({ onNavigate, shopId, onAddToCart }) => {
 
   if (error) {
     return (
-      <div className="p-10 bg-white rounded-2xl shadow-2xl mt-8 text-center text-red-500">
+      <div className="p-10 bg-gray-900 rounded-2xl shadow-2xl mt-8 text-center text-red-400">
         {error}
       </div>
     );
   }
 
   return (
-    <div className="p-10 bg-white rounded-2xl shadow-2xl mt-8 relative">
-      <h2 className="text-3xl font-bold text-gray-900 mb-4">Products</h2>
-      <p className="text-gray-600 mb-6">
+    <div className="p-8 bg-gray-900 rounded-2xl shadow-2xl mt-8 relative">
+      <h2 className="text-3xl font-extrabold text-white mb-4">Products</h2>
+      <p className="text-gray-400 mb-6">
         Browse the available products from your selected shop.
       </p>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
         {products.length > 0 ? (
           products.map((product) => (
             <ProductCard 
               key={product.id} 
               product={product} 
-              onAddToCart={() => handleAdd(product)} // Pass product to handleAdd
+              onAddToCart={() => handleAdd(product)} 
             />
           ))
         ) : (
-          <p className="text-gray-600">No products available at this time.</p>
+          <p className="text-gray-400 col-span-full">No products available at this time.</p>
         )}
       </div>
 

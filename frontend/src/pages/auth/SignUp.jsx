@@ -8,6 +8,7 @@ import { useAuth } from '../../context/AuthContext';
 const SignUp = ({ onNavigate }) => {
   const { login } = useAuth();
   const [authError, setAuthError] = useState('');
+  const [submitted, setSubmitted] = useState(false);
 
   const validate = (values) => {
     const errors = {};
@@ -18,27 +19,47 @@ const SignUp = ({ onNavigate }) => {
     return errors;
   };
 
-  const { values, errors, handleChange, handleSubmit } = useForm({ name: '', email: '', password: '', role: 'customer' }, validate);
+  const { values, errors, handleChange, handleSubmit } = useForm(
+    { name: '', email: '', password: '', role: 'customer' },
+    validate
+  );
 
   const onSubmit = async (vals) => {
     const { response, data } = await api.register(vals);
     if (response.ok) {
-      login(data.user, data.token);
-      if (data.user.role === 'shop') {
-        onNavigate('shop-dashboard');
+      // For agent or shop, show message and don't sign in
+      if (data.user.role === 'shop' || data.user.role === 'agent') {
+        setSubmitted(true);
       } else if (data.user.role === 'customer') {
+        login(data.user, data.token);
         onNavigate('customer-dashboard');
       } else if (data.user.role === 'admin') {
+        login(data.user, data.token);
         onNavigate('admin-dashboard');
-      } else if (data.user.role === 'agent') {
-        onNavigate('delivery-dashboard');
       } else {
+        login(data.user, data.token);
         onNavigate('landing');
       }
     } else {
       setAuthError(data.error || 'Registration failed');
     }
   };
+
+  if (submitted) {
+    return (
+      <div className="flex items-center justify-center min-h-screen p-4">
+        <div className="w-full max-w-sm bg-white rounded-2xl shadow-2xl p-8 text-center">
+          <h2 className="text-2xl font-bold text-lime-600 mb-4">Application Submitted!</h2>
+          <p className="text-gray-700 mb-4">
+            Thank you for signing up.<br />
+            Your account will be reviewed by an admin.<br />
+            Please check back in 24 hours to login.
+          </p>
+          <Button onClick={() => onNavigate('landing')}>Go to Home</Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-center justify-center min-h-screen p-4">
@@ -65,6 +86,7 @@ const SignUp = ({ onNavigate }) => {
           </div>
           <Button type="submit" disabled={Object.keys(errors).length > 0}>Sign Up</Button>
         </form>
+        {authError && <div className="text-red-500 text-center mt-4">{authError}</div>}
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-600">
             Already have an account?{' '}

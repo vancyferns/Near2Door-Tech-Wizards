@@ -410,9 +410,21 @@ def admin_shops_approve(shop_id):
     _id = oid(shop_id)
     if not _id:
         return jsonify({"error": "invalid shop id"}), 400
-    result = shops_col.update_one({"_id": _id}, {"$set": {"status": "open", "updated_at": datetime.datetime.utcnow()}})
+
+    # Update shop status to "open"
+    result = shops_col.update_one(
+        {"_id": _id},
+        {"$set": {"status": "open", "updated_at": datetime.datetime.utcnow()}}
+    )
     if result.matched_count == 0:
         return jsonify({"error": "Shop not found"}), 404
+
+    # Also update the corresponding user status to "approved"
+    users_col.update_one(
+        {"shop_id": shop_id},
+        {"$set": {"status": "approved", "updated_at": datetime.datetime.utcnow()}}
+    )
+
     s = shops_col.find_one({"_id": _id})
     return jsonify(to_jsonable(s)), 200
 
