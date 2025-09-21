@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://jubilant-space-disco-r7qgx45qprcxq56-5000.app.github.dev';
+const API_BASE_URL = 'https://near2door-tech-wizards.onrender.com';
 
 const api = {
   // ---------------------
