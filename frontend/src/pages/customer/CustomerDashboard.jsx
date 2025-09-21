@@ -135,7 +135,8 @@ const CustomerDashboard = ({ onNavigate }) => {
             <h3 className="text-xl sm:text-2xl font-bold text-lime-400 mb-4 text-center sm:text-left">
               Live Tracking for Order #{selectedOrder.slice(-6)}
             </h3>
-            <div className="rounded-xl overflow-hidden shadow-xl border border-slate-800 aspect-[4/3] sm:aspect-[16/9] w-full">
+            {/* The map container is now styled here */}
+            <div className="rounded-xl overflow-hidden shadow-xl border border-slate-800 w-full h-96 sm:h-[600px]">
               <MapTracker orderId={selectedOrder} role="customer" />
             </div>
             <div className="flex justify-center sm:justify-start">

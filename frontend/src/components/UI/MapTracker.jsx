@@ -136,26 +136,14 @@ const MapTracker = ({ mapId = 'map', agentLocation, customerLocation }) => {
     // Fit map to bounds
     const group = new L.featureGroup();
     if (agentMarkerRef.current) group.addLayer(agentMarkerRef.current);
-    if (customerMarkerRef.current) group.addLayer(customerMarkerRef.current);
+    if (customerMarkerRef.current) group.addLayer(customerMarker.current);
     if (group.getLayers().length > 0) {
       map.fitBounds(group.getBounds().pad(0.5));
     }
   }, [agentLocation, customerLocation]);
 
   return (
-    <div className="flex justify-center items-center min-h-[500px] bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460] py-8 px-4">
-      <div className="w-full max-w-2xl rounded-3xl shadow-2xl border border-[#0f3460] bg-[#23234b] relative">
-        <div className="absolute top-6 left-8 z-10">
-          <h2 className="text-2xl font-bold text-white drop-shadow-lg">Live Delivery Tracker</h2>
-          <p className="text-sm text-[#e94560] font-semibold mt-2">Track your order in real time</p>
-        </div>
-        <div
-          id={mapId}
-          className="rounded-2xl shadow-xl border border-[#e94560] mt-20 mb-8 mx-8"
-          style={{ height: '400px', width: 'calc(100% - 4rem)' }}
-        />
-      </div>
-    </div>
+    <div id={mapId} style={{ height: '100%', width: '100%' }} />
   );
 };
 
